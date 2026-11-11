@@ -984,9 +984,18 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
   </sc-if>
 
   <!-- ============ Prototype only: dev-tools controls, deliberately not the design system ============ -->
-  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 10px; bottom: 6px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
+  <!-- Prototype only: test names for the guest Find a student sheet. Quiet dev-tools text, never product UI. -->
+  <sc-if value="{{sh.guest}}" hint-placeholder-val="{{false}}">
+    <div class="proto-trigger" aria-label="Prototype test names" style="position: absolute; left: 24px; right: 24px; bottom: {{guest.hintBottom}}; z-index: 81; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: {{proto.trigColor}}; opacity: 0.55">
+      <span>Test names:</span>
+      <button type="button" class="proto-trigger" onMouseDown="{{kb.hold}}" onClick="{{guest.tryNin}}" style="padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer">Nin ok</button>
+      <button type="button" class="proto-trigger" onMouseDown="{{kb.hold}}" onClick="{{guest.tryMei}}" style="padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer">Mei blocked</button>
+      <button type="button" class="proto-trigger" onMouseDown="{{kb.hold}}" onClick="{{guest.tryNic}}" style="padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer">Nic several</button>
+    </div>
+  </sc-if>
+  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 24px; bottom: 12px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
   <sc-if value="{{proto.open}}" hint-placeholder-val="{{false}}">
-    <aside class="proto" aria-label="Prototype controls" style="position: absolute; left: 10px; bottom: 34px; z-index: 82; width: 250px; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
+    <aside class="proto" aria-label="Prototype controls" style="position: absolute; left: 24px; bottom: 40px; z-index: 82; width: 250px; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
       <div style="font-weight: 600">Prototype only</div>
       <!-- Two plain tabs: Controls (conditions you layer on) and Checkpoints (jump to a moment in the flow). -->
       <div role="tablist" aria-label="Prototype panel" style="display: flex; gap: 12px; border-bottom: 1px solid #3C3C3C; margin: 0 -10px 2px; padding: 0 10px">
@@ -1665,6 +1674,8 @@ class Component extends DCLogic {
     const guest = {
       open: () => this.setState({ sheet: 'guest', gq: '' }),
       remove: () => this.guestOut(),
+      tryNin: () => this.setState({ gq: 'Nin' }), tryMei: () => this.setState({ gq: 'Mei' }), tryNic: () => this.setState({ gq: 'Nic' }),
+      hintBottom: kbOpen ? '344px' : '36px',
       q: st.gq || '', set: (v) => this.setState({ gq: v }),
       intro: gFirst + ' is picking up as a guest. Only students who added ' + gFirst + ' in the app can be added.',
       hint: !!gs && gq.length < 3,

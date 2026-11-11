@@ -711,8 +711,25 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
 
   <sc-if value="{{sh.checkin}}" hint-placeholder-val="{{false}}">
     <div style="position: absolute; left: 0; right: 0; top: 0; bottom: {{kb.lift}}; z-index: 50">
-      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Check in a student" full="{{true}}" top="{{56}}" on-close="{{closeSheet}}">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Check in" full="{{true}}" top="{{56}}" on-close="{{closeSheet}}">
         <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <!-- Student · Guest (shared rules: operators can check in a guest, like the kiosk). Same segmented control as the queue tabs. -->
+          <div role="tablist" aria-label="Who are you checking in?" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 3px; border-radius: 12px; background: rgba(118, 118, 128, 0.12)">
+            <sc-for list="{{ci.modes}}" as="t" hint-placeholder-count="2">
+              <button type="button" role="tab" class="tab-btn" aria-selected="{{t.sel}}" onClick="{{t.go}}" style="display: flex; align-items: center; justify-content: center; height: 38px; border: 0; border-radius: 9px; background: {{t.bg}}; box-shadow: {{t.shadow}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 600; color: {{t.color}}; cursor: pointer">{{t.label}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ci.isGuest}}" hint-placeholder-val="{{false}}">
+            <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">For someone picking up who isn’t a student, like a parent or roommate. You’ll find who they’re picking up for when you serve them.</div>
+            <div onFocus="{{kb.focusGf}}" onBlur="{{kb.blur}}">
+              <x-import component-from-global-scope="UntitledUI.Input" size="lg" label="First name" placeholder="Dana" auto-focus="{{true}}" value="{{ci.first}}" on-change="{{ci.setFirst}}"></x-import>
+            </div>
+            <div onFocus="{{kb.focusGl}}" onBlur="{{kb.blur}}">
+              <x-import component-from-global-scope="UntitledUI.Input" size="lg" label="Last name" placeholder="Reyes" value="{{ci.last}}" on-change="{{ci.setLast}}"></x-import>
+            </div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{ci.guestBlocked}}" on-press="{{ci.checkInGuest}}">Check in guest</x-import></div>
+          </sc-if>
+          <sc-if value="{{ci.isStudent}}" hint-placeholder-val="{{true}}">
           <div onFocus="{{kb.focusCiIn}}" onBlur="{{kb.blurCiIn}}">
             <x-import component-from-global-scope="UntitledUI.InputGroup" size="lg" label="Find a student with packages ready" value="{{ci.q}}" on-change="{{ci.set}}" trailing-addon="{{ci.addon}}">
               <x-import component-from-global-scope="UntitledUI.InputBase" size="lg" placeholder="Name or ID" icon="{{ic.SearchLg}}" auto-focus="{{true}}"></x-import>
@@ -740,6 +757,7 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
           </sc-if>
           <sc-if value="{{ci.none}}" hint-placeholder-val="{{false}}">
             <div style="padding: 16px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">No one with packages ready matches “{{ci.q}}”.</div>
+          </sc-if>
           </sc-if>
         </div>
       </x-import>
@@ -1113,7 +1131,7 @@ class Component extends DCLogic {
       ],
       nextNum: 112, gq: '', baseServed: 34,
       mine: null, screen: null, camMode: null, camAlert: null, camFlash: null,
-      sheet: null, claim: null, busy: null, ciQ: '', skipNote: '', relOk: false, typeQ: '', typeBad: false,
+      sheet: null, claim: null, busy: null, ciQ: '', ciMode: 'student', ciFirst: '', ciLast: '', skipNote: '', relOk: false, typeQ: '', typeBad: false,
       sigD: '', toast: null, offline: false, partial: true, race: false, emptied: null,
       kb: null, kbShift: false, kbNum: false, zoom: null, camOpen: false, typeFor: null, printer: 'Back office', printerDown: false,
       annUntil: 0, protoOpen: false, picking: false, justDone: 0, moveFor: null, moveTo: null, waitMode: null, now: Date.now()
@@ -1188,11 +1206,13 @@ class Component extends DCLogic {
   // ---------- keyboard ----------
   kbOpen(t) { clearTimeout(this._blurT); if (!this.state.kb || this.state.kb !== t) this.setState({ kb: t, kbShift: t !== 'search', kbNum: false }); }
   kbBlur() { clearTimeout(this._blurT); this._blurT = setTimeout(() => this.setState({ kb: null }), 60); }
-  kbGet(t) { const s = this.state; return t === 'search' ? s.q : t === 'ci' ? s.ciQ : t === 'gq' ? s.gq : t === 'type' ? s.typeQ : t === 'note' ? s.skipNote : ''; }
+  kbGet(t) { const s = this.state; return t === 'search' ? s.q : t === 'ci' ? s.ciQ : t === 'gq' ? s.gq : t === 'gf' ? s.ciFirst : t === 'gl' ? s.ciLast : t === 'type' ? s.typeQ : t === 'note' ? s.skipNote : ''; }
   kbSet(t, v) {
     if (t === 'search') this.setState({ q: v });
     else if (t === 'ci') this.setState({ ciQ: v });
     else if (t === 'gq') this.setState({ gq: v });
+    else if (t === 'gf') this.setState({ ciFirst: v });
+    else if (t === 'gl') this.setState({ ciLast: v });
     else if (t === 'type') this.setState({ typeQ: v, typeBad: false });
     else if (t === 'note') this.setState({ skipNote: v });
   }
@@ -1814,6 +1834,7 @@ class Component extends DCLogic {
       retLabel, retBg: retLabel === 'return' ? '#ABB0BA' : 'var(--color-bg-brand-solid)', retFg: retLabel === 'return' ? '#000000' : '#FFFFFF',
       ret: () => { const t = st.kb; if (t === 'type') { tyCheck(); return; } if (t === 'note') { this.kbSet('note', this.kbGet('note') + '\n'); return; } this.kbClose(); },
       hold: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      focusGf: () => this.kbOpen('gf'), focusGl: () => this.kbOpen('gl'),
       focusGq: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbOpen('gq'); },
       blurGq: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbBlur(); },
       focusCiIn: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbOpen('ci'); },
@@ -1886,7 +1907,7 @@ class Component extends DCLogic {
         ['proxy', '8 · Proxy pickup', 'Serving Alex Park, picking up for Kevin O’Brien and Mei Lin.'],
         ['move', '9 · Move to a window', 'The Move sheet is open for the Up next student.'],
         ['release', '10 · Put back & release', 'Serving Emily with 2 of 3 pulled; the Put back & release sheet is open.'],
-        ['checkin', '11 · Walk-up check-in', 'The Check in sheet is open.'],
+        ['checkin', '11 · Walk-up check-in', 'The Check in sheet is open on Student. Tap Guest to check in a guest by name.'],
         ['guest', '12 · Guest pickup', 'Serving guest Dana Reyes (A111); no student added yet. Tap Find a student and search Nin to add Nina Patel.']
       ].map(([k, label, tip]) => ({ label, tip, go: () => this.jump(k) })),
       errs: [
@@ -1928,6 +1949,18 @@ class Component extends DCLogic {
       } : {},
       claim: { by: st.claim && st.claim.by, who: st.claim && st.claim.who, noNext: !oldest || st.offline, next: () => { this.setState({ sheet: null }); if (oldest) this.serve(oldest); } },
       ci: { q: st.ciQ, set: (v) => this.setState({ ciQ: v }),
+        isGuest: st.ciMode === 'guest', isStudent: st.ciMode !== 'guest',
+        modes: [['student', 'Student'], ['guest', 'Guest']].map(([k, label]) => { const sel = (st.ciMode || 'student') === k; return { label, sel, bg: sel ? 'var(--color-bg-primary)' : 'transparent', shadow: sel ? '0 3px 8px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04)' : 'none', color: sel ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
+          go: () => { this.kbClose(); if (k === 'guest' && !st.ciFirst && !st.ciLast && st.ciQ.trim() && !/\d/.test(st.ciQ)) { const w = st.ciQ.trim().split(/\s+/); this.setState({ ciMode: k, ciFirst: w[0], ciLast: w.slice(1).join(' ') }); } else this.setState({ ciMode: k }); } }; }),
+        first: st.ciFirst, last: st.ciLast, setFirst: (v) => this.setState({ ciFirst: v }), setLast: (v) => this.setState({ ciLast: v }),
+        guestBlocked: !st.ciFirst.trim() || !st.ciLast.trim() || st.offline,
+        checkInGuest: () => {
+          const c = this.state; if (!c.ciFirst.trim() || !c.ciLast.trim() || c.offline) return;
+          const t = 'A' + c.nextNum, name = c.ciFirst.trim() + ' ' + c.ciLast.trim();
+          this.kbClose();
+          this.setState({ queue: c.queue.concat([{ t, name, sid: null, mail: null, wait: 0, via: 'Checked in by you', pk: [], guest: true }]), nextNum: c.nextNum + 1, sheet: null, ciQ: '', ciFirst: '', ciLast: '', ciMode: 'student', qTab: 'queue' });
+          this.toast(t + ' · ' + name + ' checked in');
+        },
         addon: (window.React && U.Button ? window.React.createElement(U.Button, { color: 'secondary', size: 'lg', iconLeading: ic.Scan, onPress: () => { this.kbClose(); this.setState({ sheet: null, screen: 'cam', camMode: 'checkinId', camAlert: null, camFlash: null }); } }, 'Scan ID') : null), rows: ciRows, has: ciRows.length > 0, none: ciRows.length === 0 },
       skip: { note: st.skipNote, empty: !st.skipNote.trim(), set: (v) => this.setState({ skipNote: v }), confirm: () => { this.kbClose(); this.setState({ sheet: null, mine: Object.assign({}, m, { sig: { skipped: true, note: st.skipNote.trim() } }), skipNote: '' }); } },
       search: {
@@ -1974,7 +2007,7 @@ class Component extends DCLogic {
       serveNext: () => { const o = this.oldest(); if (o) this.serve(o); },
       resume: () => { this.kbClose(); this.setState({ screen: 'serve' }); },
       backToQueue: () => this.setState({ screen: null, view: 'inbound', inTab: 'pickup' }),
-      openCheckIn: () => { this.kbClose(); this.setState({ sheet: 'checkin', ciQ: st.q }); },
+      openCheckIn: () => { this.kbClose(); this.setState({ sheet: 'checkin', ciQ: st.q, ciMode: 'student', ciFirst: '', ciLast: '' }); },
       closeSheet: () => {
         this.kbClose();
         const b = st.sheet === 'busy' ? st.busy : null;

@@ -1,1 +1,86 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mobile pickup queue</title><meta http-equiv="refresh" content="0; url=Main.dc.html"><a href="Main.dc.html">Open the mobile pickup queue</a>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mobile pickup queue · demo</title>
+<!--
+  Demo viewer only. Shows Main.dc.html inside an iPhone 13 frame, scaled to fit the window.
+  The app itself (Main.dc.html) has no frame code: open it directly for the plain screen.
+-->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { background: #E9EAEB; font-family: -apple-system, 'Segoe UI', Inter, sans-serif; }
+  body.bare-phone { background: #FFFFFF; }
+  .stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .scaler { transform-origin: center center; }
+  /* iPhone 13: 390 x 844 screen, bezel and notch drawn here, never in the app. */
+  .phone { position: relative; padding: 14px; border-radius: 60px; background: #1B1B1D;
+           box-shadow: 0 0 0 2px #3A3A3C, 0 30px 60px -20px rgba(16, 24, 40, 0.35); }
+  .phone::before, .phone::after { content: ""; position: absolute; width: 4px; border-radius: 2px; background: #2C2C2E; }
+  .phone::before { left: -5px; top: 170px; height: 64px; box-shadow: 0 84px 0 #2C2C2E; }
+  .phone::after { right: -5px; top: 220px; height: 96px; }
+  .screen { position: relative; width: 390px; height: 844px; border-radius: 46px; overflow: hidden; background: #FFFFFF; }
+  .notch { position: absolute; top: 0; left: 50%; width: 156px; height: 31px; margin-left: -78px;
+           border-radius: 0 0 20px 20px; background: #1B1B1D; z-index: 2; pointer-events: none; }
+  iframe { display: block; width: 390px; height: 844px; border: 0; }
+  body.no-frame .phone { padding: 0; background: none; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.15); border-radius: 0; }
+  body.no-frame .phone::before, body.no-frame .phone::after, body.no-frame .notch { display: none; }
+  body.no-frame .screen { border-radius: 0; }
+  /* Prototype-only control: quiet dev-tools text, outside the phone. */
+  .viewer-bar { position: fixed; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 14px;
+                font: 11px/16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #1E1E1E; opacity: 0.55; }
+  .viewer-bar button, .viewer-bar a { padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; }
+  .viewer-bar [aria-pressed="true"] { text-decoration: none; font-weight: 600; }
+  body.bare-phone .viewer-bar { display: none; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="scaler" id="scaler">
+    <div class="phone">
+      <div class="screen">
+        <div class="notch" aria-hidden="true"></div>
+        <iframe src="Main.dc.html" title="Mobile pickup queue prototype"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="viewer-bar" aria-label="Demo viewer">
+  <button type="button" id="btn-frame">Phone frame</button>
+  <button type="button" id="btn-bare">No frame</button>
+  <a href="Main.dc.html">Open app only</a>
+</div>
+<script>
+  (function () {
+    var body = document.body, scaler = document.getElementById('scaler');
+    var bFrame = document.getElementById('btn-frame'), bBare = document.getElementById('btn-bare');
+    // On a real phone, skip the bezel and fill the screen.
+    var onPhone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 500;
+    var frame = true;
+    try { frame = localStorage.getItem('mpqViewer.frame') !== 'off'; } catch (e) {}
+    if (onPhone) { body.classList.add('bare-phone', 'no-frame'); frame = false; }
+    function fit() {
+      var vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+      var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      var pad = frame ? 28 : 0, w = 390 + pad, h = 844 + pad;
+      var room = onPhone ? 0 : 56;
+      var s = Math.min(1, (vw - (onPhone ? 0 : 32)) / w, (vh - room) / h);
+      scaler.style.transform = 'scale(' + s + ')';
+    }
+    function apply() {
+      body.classList.toggle('no-frame', !frame);
+      bFrame.setAttribute('aria-pressed', String(frame));
+      bBare.setAttribute('aria-pressed', String(!frame));
+      try { localStorage.setItem('mpqViewer.frame', frame ? 'on' : 'off'); } catch (e) {}
+      fit();
+    }
+    bFrame.onclick = function () { frame = true; apply(); };
+    bBare.onclick = function () { frame = false; apply(); };
+    window.addEventListener('resize', fit);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+    if (onPhone) fit(); else apply();
+  })();
+</script>
+</body>
+</html>

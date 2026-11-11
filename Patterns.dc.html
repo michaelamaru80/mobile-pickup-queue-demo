@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile patterns</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/untitledui/components/bundle.css">
+<script src="ds/untitledui/components/bundle.js"></script>
+<script src="ds/untitledui/components/mobile/mobile.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+html:root{--color-brand-25:#f6fafb;--color-brand-50:#eef5f7;--color-brand-100:#d9e9ed;--color-brand-200:#b7d3db;--color-brand-300:#8bb6c2;--color-brand-400:#5d93a2;--color-brand-500:#437886;--color-brand-600:#35626e;--color-brand-700:#2f525c;--color-brand-800:#2b454d;--color-brand-900:#263b42;--color-brand-950:#15252a}
+.pc{display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 0 0 1px var(--color-border-secondary)}
+.pc h2{margin:0;font-size:18px;line-height:28px;font-weight:600;color:var(--color-text-primary)}
+.pc .comp{font-size:12px;line-height:18px;font-weight:500;color:var(--color-text-tertiary);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.pc ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:20px;color:var(--color-text-secondary)}
+.demo{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:var(--color-bg-secondary)}
+.demo.dark{background:#0C0E12}
+.fullw{display:flex;flex-direction:column}.fullw>*{width:100%}.fullw button{width:100% !important}
+</style>
+</helmet>
+<div style="width: 1320px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 32px; font-family: Inter, system-ui, sans-serif; color: var(--color-text-primary)">
+  <header style="display: flex; flex-direction: column; gap: 8px; max-width: 820px">
+    <span style="font-size: 13px; line-height: 20px; font-weight: 600; color: var(--color-text-brand-secondary)">Delivery CTRL · reference</span>
+    <h1 style="margin: 0; font-size: 36px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em">Mobile patterns</h1>
+    <p style="margin: 0; font-size: 16px; line-height: 24px; color: var(--color-text-tertiary)">Patterns agreed on the Mobile Pickup Queue. Each one is a live Untitled UI component (Draft, in the design system's mobile patterns) and follows the mobile-app-design skill. Reuse these before designing anything new.</p>
+  </header>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start">
+
+    <section class="pc">
+      <div><h2>Person card</h2><div class="comp">UntitledMobile.PersonCard</div></div>
+      <div class="demo"><x-import component-from-global-scope="UntitledMobile.PersonCard" photo="{{photo}}" name="Emily Chen" eyebrow="Up next · waiting 14 min" eyebrow-color="var(--color-yellow-700)" ticket="A105" lines="{{pcLines}}" action="{{pcAction}}" on-move="{{noop}}"></x-import></div>
+      <ul><li>Photo fills the left edge (120 pt), tap to enlarge; same-size “No photo” tile.</li><li>One full-width primary action; ⇄ move icon top-right (44 pt).</li><li>Student ID and mail code right under the name on the serve screen.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Numbered steps</h2><div class="comp">UntitledMobile.StepHeader</div></div>
+      <div class="demo" style="background: #ffffff; box-shadow: inset 0 0 0 1px var(--color-border-secondary)">
+        <x-import component-from-global-scope="UntitledMobile.StepHeader" number="1" state="done" title="Pull packages" meta="3 of 3"></x-import>
+        <x-import component-from-global-scope="UntitledMobile.StepHeader" number="2" state="current" title="Confirm it’s them"></x-import>
+        <x-import component-from-global-scope="UntitledMobile.StepHeader" number="3" state="upcoming" title="Upcoming step"></x-import>
+      </div>
+      <ul><li>Content aligns with the step title (44 pt indent); step buttons full card width.</li><li>Auto-scroll to the next step when one finishes.</li><li>Final action stays pressable at 50%; an early tap spotlights the missing step.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Grouped items</h2><div class="comp">UntitledMobile.GroupBand</div></div>
+      <div class="demo" style="background: #ffffff; box-shadow: inset 0 0 0 1px var(--color-border-secondary)">
+        <x-import component-from-global-scope="UntitledMobile.GroupBand" label="For Kevin O’Brien" count="2"></x-import>
+        <div style="font-size: 15px; line-height: 22px; font-weight: 600">Shelf B · B9</div>
+        <x-import component-from-global-scope="UntitledMobile.GroupBand" label="Priya Raman (their own)" count="2"></x-import>
+        <div style="font-size: 15px; line-height: 22px; font-weight: 600">Shelf A · A4</div>
+      </div>
+      <ul><li>Full-width gray band per owner; label aligned with row text.</li><li>Used on the serve screen and in the scan sheet's list.</li><li>Proxy line under the name: “Picking up for …” in brand color.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Scan sheet</h2><div class="comp">UntitledMobile.ScanSheet</div></div>
+      <div class="demo dark" style="position: relative; height: 300px; padding: 0; overflow: hidden; justify-content: flex-end">
+        <x-import component-from-global-scope="UntitledMobile.ScanSheet" title="Emily Chen’s packages" scanned="{{one}}" total="{{three}}" on-toggle="{{noop}}" on-done="{{noop}}" on-cant-scan="{{noop}}"></x-import>
+      </div>
+      <ul><li>Collapsed: progress, Done (disabled until a scan), “Can't scan a label?”.</li><li>Expand for To scan / Scanned; pencil to type, ✕ to remove with Undo.</li><li>All scanned: green bar, “All N scanned ✓”, Done pulses.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Camera fallback</h2><div class="comp">UntitledMobile.CameraFallback</div></div>
+      <div class="demo dark" style="height: 120px; justify-content: flex-end; align-items: center; padding: 0"><x-import component-from-global-scope="UntitledMobile.CameraFallback" on-press="{{noop}}"></x-import></div>
+      <ul><li>On every camera; white text on black (not a gray tertiary).</li><li>Search/check-in: back to the field with the keyboard. ID proof: “Type their ID” sheet, saved as weaker proof.</li><li>Frames 344 pt wide at a fixed top; close with ✕ only.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Move to a window</h2><div class="comp">UntitledMobile.OptionRow</div></div>
+      <div class="demo" role="radiogroup" aria-label="Window">
+        <x-import component-from-global-scope="UntitledMobile.OptionRow" icon="{{icMonitor}}" label="Window 1" status="Serving A103" status-tone="warning"></x-import>
+        <x-import component-from-global-scope="UntitledMobile.OptionRow" icon="{{icMonitor}}" label="Window 2" status="Available" status-tone="success" selected="{{yes}}"></x-import>
+        <div class="fullw"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg">Move to Window 2</x-import></div>
+        <div class="fullw"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg">Cancel</x-import></div>
+      </div>
+      <ul><li>Opened from ⇄ on the card; destinations with status dots.</li><li>Stacked primary + Cancel; dark toast with Undo after.</li><li>Remind them to bring anything already pulled.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Dark toast</h2><div class="comp">UntitledMobile.Toast tone="dark"</div></div>
+      <div class="demo"><x-import component-from-global-scope="UntitledMobile.Toast" tone="dark" text="A105 picked up" action="{{undo}}"></x-import><x-import component-from-global-scope="UntitledMobile.Toast" tone="dark" variant="warning" text="Back office printer isn’t responding" action="{{retry}}"></x-import></div>
+      <ul><li>Screen confirmations are dark; the white pill is for camera views.</li><li>Action is a small text button (Undo, Try again), never a boxed button.</li><li>About 12 pt above the footer or tab bar.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Print to preset printer</h2><div class="comp">UntitledMobile.PrintAction</div></div>
+      <div class="demo" style="flex-direction: row; justify-content: space-around"><x-import component-from-global-scope="UntitledMobile.PrintAction" label="Print pick list" on-press="{{noop}}"></x-import><x-import component-from-global-scope="UntitledMobile.PrintAction" label="Print pick list" printed-to="Back office" printed-at="11:13 PM" on-press="{{noop}}"></x-import></div>
+      <ul><li>No printer picker: sends to the printer set in settings.</li><li>After printing: “Print again” + a caption; the button never moves.</li><li>Receipts work the same from Completed.</li></ul>
+    </section>
+
+    <section class="pc">
+      <div><h2>Buttons, waits and headers</h2><div class="comp">Untitled UI Button · tokens</div></div>
+      <div class="demo">
+        <div class="fullw"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg">Complete pickup</x-import></div>
+        <div style="display: flex; justify-content: center"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg">Put back &amp; release</x-import></div>
+        <div style="display: flex; gap: 16px; justify-content: center; font-size: 14px; line-height: 20px; font-weight: 500"><span style="color: var(--color-text-secondary)">9 min</span><span style="color: var(--color-yellow-700)">17 min</span><span style="color: var(--color-text-error-primary)">22 min</span></div>
+      </div>
+      <ul><li>Stack buttons full width; rare or cautionary actions are text buttons.</li><li>Waits: 15+ min yellow-700, 20+ min text-error-primary.</li><li>Header: 24 pt menu icon (fg-secondary) + 20 pt semibold title.</li></ul>
+    </section>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1320,"height":1880}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = (window.UntitledUI && window.UntitledUI.Icons) || {};
+    const noop = () => {};
+    return {
+      noop, yes: true, one: 1, three: 3,
+      photo: 'assets/1500fd05e884843bd0102de99436dea8.jpg',
+      pcLines: ['3 packages · Shelf C'],
+      pcAction: { label: 'Serve next', onPress: noop },
+      icMonitor: I.Monitor01,
+      undo: { label: 'Undo', onPress: noop },
+      retry: { label: 'Try again', onPress: noop }
+    };
+  }
+}
+</script>
+</body>
+</html>

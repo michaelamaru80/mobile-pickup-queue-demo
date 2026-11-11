@@ -1,0 +1,1991 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operator app – Pickup queue</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/untitledui/components/bundle.css">
+<script src="ds/untitledui/components/bundle.js"></script>
+<script src="ds/untitledui/components/mobile/mobile.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+html:root{--color-brand-25:#f6fafb;--color-brand-50:#eef5f7;--color-brand-100:#d9e9ed;--color-brand-200:#b7d3db;--color-brand-300:#8bb6c2;--color-brand-400:#5d93a2;--color-brand-500:#437886;--color-brand-600:#35626e;--color-brand-700:#2f525c;--color-brand-800:#2b454d;--color-brand-900:#263b42;--color-brand-950:#15252a}
+a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-secondary_hover)}
+.row-btn{transition:background-color 100ms linear}
+.row-btn:hover{background:var(--color-bg-primary_hover) !important}
+.photo-btn:focus-visible{outline:2px solid var(--color-focus-ring);outline-offset:-2px}
+.row-btn:focus-visible,.nav-btn:focus-visible,.tab-btn:focus-visible,.fab:focus-visible,.pad:focus-visible,.kk:focus-visible,.fld:focus-within{outline:2px solid var(--color-focus-ring);outline-offset:2px}
+.fld input,.fld select{border:0;outline:0;background:transparent;font:inherit;color:inherit;width:100%;min-width:0;padding:0;appearance:none;-webkit-appearance:none}
+.fld input::placeholder{color:var(--color-text-placeholder)}
+.hscroll{scrollbar-width:none}.hscroll::-webkit-scrollbar{display:none}
+.fullw{display:flex;flex-direction:column}.fullw>*{width:100%}.fullw button,.fullw a{width:100% !important}
+.scroll>*{flex-shrink:0}
+/* Step content lines up under the step title (32pt marker + 12pt gap). */
+.step>*:not(:first-child){margin-left:44px}
+.step>.stepfull{margin-left:0}
+.scroll{scrollbar-width:none}.scroll::-webkit-scrollbar{display:none}
+.kk{transition:background-color 60ms linear}
+.kk:active{background:#B9BDC6 !important}
+.toast-act:hover,.toast-act:active{background:rgba(255,255,255,0.12) !important}
+.on-dark button,.on-dark button *{color:#FFFFFF !important}
+/* Camera fallback: a plain white text link on every scan screen (no box on hover; dims when pressed). */
+.on-dark button,.on-dark button:hover,.on-dark button:active{background:transparent !important;box-shadow:none !important}
+.on-dark button:active{opacity:.7}
+@keyframes kb-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.kb-anim{animation:kb-up 220ms cubic-bezier(.2,.8,.2,1)}
+@keyframes serve-pulse{0%{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 0 rgba(67,120,134,.45)}60%{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 10px rgba(67,120,134,0)}100%{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 0 rgba(67,120,134,0)}}
+@keyframes done-breathe{from{box-shadow:0 0 0 0 rgba(23,178,106,.45)}to{box-shadow:0 0 0 7px rgba(23,178,106,.18)}}
+.done-pulse{animation:done-breathe 650ms ease-in-out infinite alternate}
+/* Completion moment: success beat on Serve, then the queue reacts. */
+@keyframes picked-pop{0%{transform:scale(.96)}55%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes picked-check{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.picked{animation:picked-pop 360ms cubic-bezier(.2,.8,.2,1)}
+.picked-ic{animation:picked-check 300ms 80ms cubic-bezier(.2,.8,.2,1) both}
+@keyframes count-tick{0%{transform:translateY(8px);opacity:0;color:var(--color-text-success-primary)}35%{transform:translateY(0);opacity:1;color:var(--color-text-success-primary)}100%{color:inherit}}
+@keyframes byme-flash{0%,60%{color:var(--color-text-success-primary);font-weight:600}100%{color:var(--color-text-tertiary)}}
+@keyframes up-slide{from{transform:translateX(32px);opacity:0}to{transform:translateX(0);opacity:1}}
+.tick{display:inline-block;animation:count-tick 1200ms cubic-bezier(.2,.8,.2,1)}
+.byme-flash{animation:byme-flash 1600ms ease-out}
+.up-slide{animation:up-slide 420ms 120ms cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion: reduce){.picked,.picked-ic,.tick,.up-slide{animation:none}}
+@media (prefers-reduced-motion: reduce){.done-pulse{animation:none;box-shadow:0 0 0 3px rgba(23,178,106,.35)}}
+@keyframes spot-in{from{opacity:0}to{opacity:1}}
+.spot-in{animation:spot-in 200ms linear}
+@keyframes serve-breathe{from{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 0 rgba(67,120,134,.35)}to{box-shadow:0 0 0 2px var(--color-border-brand),0 0 0 7px rgba(67,120,134,.16)}}
+.pulse-a{animation:serve-breathe 650ms ease-in-out infinite alternate}
+@keyframes step-breathe{from{box-shadow:inset 0 0 0 1px var(--color-border-brand),0 0 0 0 rgba(67,120,134,.35)}to{box-shadow:inset 0 0 0 2px var(--color-border-brand),0 0 0 7px rgba(67,120,134,.16)}}
+.spot-step{border-radius:12px;animation:step-breathe 650ms ease-in-out infinite alternate}
+@media (prefers-reduced-motion: reduce){.spot-step{animation:none;box-shadow:inset 0 0 0 2px var(--color-border-brand)}}
+.pulse-b{animation:serve-pulse-b 700ms ease-out 2}
+@keyframes serve-pulse-b{0%{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 0 rgba(67,120,134,.45)}60%{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 10px rgba(67,120,134,0)}100%{box-shadow:0 0 0 1px var(--color-border-brand),0 0 0 0 rgba(67,120,134,0)}}
+@media (prefers-reduced-motion: reduce){.pulse-a,.pulse-b{animation:none}}
+@keyframes pq-pulse{0%{box-shadow:0 0 0 0 rgba(23,178,106,0.55)}70%{box-shadow:0 0 0 7px rgba(23,178,106,0)}100%{box-shadow:0 0 0 0 rgba(23,178,106,0)}}
+.live-dot{animation:pq-pulse 1.6s linear infinite}
+@keyframes scanline{0%{top:8%}50%{top:88%}100%{top:8%}}
+.scanline{animation:scanline 2.4s linear infinite}
+@media (prefers-reduced-motion: reduce){.live-dot,.scanline,.kb-anim{animation:none}}
+.proto{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;background:#1E1E1E !important;color:#CCCCCC !important;border-radius:4px !important;box-shadow:0 0 0 1px #3C3C3C,0 8px 24px rgba(0,0,0,.4) !important;max-height:calc(100vh - 80px) !important;overflow-y:auto !important}
+.proto *{font-family:inherit !important;letter-spacing:0 !important;font-size:11px !important;line-height:16px !important;border-color:#3C3C3C !important}
+.proto *:not([role=radio]):not([role=switch]){color:#CCCCCC !important;background-color:transparent !important;box-shadow:none !important;border-radius:2px !important}
+.proto div[style*="font-weight: 600"],.proto span[style*="font-weight: 600"]{color:#FFFFFF !important;text-transform:lowercase !important}
+.proto span[style*="width: 32px"]{display:none !important}
+.proto [role=switch]{width:32px !important;height:16px !important;padding:2px !important;border-radius:2px !important;background-color:#444444 !important;box-shadow:none !important}
+.proto [role=switch][aria-checked=true]{background-color:#0E7AFE !important}
+.proto [role=switch][role=switch] > span{width:12px !important;height:12px !important;border-radius:1px !important;background-color:#EEEEEE !important;box-shadow:none !important}
+.proto [role=radio]{border-radius:2px !important}
+.proto-trigger.uu-secondary{background:#1E1E1E !important;color:#CCCCCC !important;box-shadow:0 0 0 1px #3C3C3C !important;border-radius:4px !important;height:30px !important}
+.proto .uu-row:hover,.proto .uu-btn:hover{background-color:#2D2D2D !important}
+.proto .uu-btn{border:1px solid #555555 !important;height:auto !important;min-height:22px !important;padding:3px 8px !important;white-space:normal !important;text-align:left !important}
+.proto [data-tip]{position:relative !important}
+.proto [data-tip]:hover::after,.proto [data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;left:-1px;right:-1px;bottom:calc(100% + 4px);z-index:5;padding:4px 8px;background:#3A3A3A;color:#FFFFFF;border:1px solid #666666;border-radius:2px;white-space:normal;text-align:left;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.proto-trigger{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;font-size:11px !important;letter-spacing:0 !important}
+.proto .proto-tab{color:#8A8A8A !important;border-bottom:2px solid transparent !important;border-radius:0 !important}
+.proto .proto-tab.on{color:#FFFFFF !important;border-bottom-color:#FFFFFF !important}
+</style>
+</helmet>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: clip; display: flex; flex-direction: column; background: var(--color-bg-primary); color: var(--color-text-primary); font-family: Inter, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased">
+
+  <!-- ============ iPhone 13 device chrome: status bar 47pt, home indicator in the 34pt bottom inset ============ -->
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 47px; z-index: 80; display: flex; align-items: center; justify-content: space-between; padding: 4px 26px 0 42px; box-sizing: border-box; pointer-events: none; color: {{chrome.fg}}">
+    <span style="font-size: 16px; line-height: 20px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums">9:41</span>
+    <span style="display: flex; align-items: center; gap: 6px">
+      <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"></rect><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"></rect><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"></rect></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5 10.2 9.2a3.2 3.2 0 0 0-4.4 0z" fill="currentColor"></path><path d="M3.6 7a6.3 6.3 0 0 1 8.8 0l1.4-1.5a8.4 8.4 0 0 0-11.6 0z" fill="currentColor"></path><path d="M.6 4a10.6 10.6 0 0 1 14.8 0L16 3.3 14.9 2.2a12.6 12.6 0 0 0-13.8 0L0 3.3z" fill="currentColor"></path></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" stroke-opacity="0.4"></rect><rect x="2" y="2" width="19" height="8" rx="2" fill="currentColor"></rect><rect x="24" y="4" width="1.5" height="4" rx="0.75" fill="currentColor" fill-opacity="0.4"></rect></svg>
+    </span>
+  </div>
+  <div aria-hidden="true" style="position: absolute; left: 50%; bottom: 8px; width: 134px; height: 5px; margin-left: -67px; border-radius: 100px; z-index: 80; pointer-events: none; background: {{chrome.fg}}"></div>
+
+  <!-- ============ HOME ============ -->
+  <sc-if value="{{f.home}}" hint-placeholder-val="{{true}}">
+    <header style="flex: 0 0 auto; display: flex; align-items: center; gap: 4px; height: 44px; padding: 0 16px 0 4px; margin-top: 47px">
+      <button type="button" class="nav-btn row-btn" aria-label="Menu" onClick="{{dead}}" style="width: 44px; height: 44px; flex: 0 0 auto; border: 0; border-radius: 8px; background: none; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--color-fg-secondary); cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.Menu01" class="size-6" aria-hidden="true"></x-import></button>
+      <div style="font-size: 20px; line-height: 28px; font-weight: 600; color: var(--color-text-primary)">Hi, John Bourne</div>
+    </header>
+    <main class="scroll" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 16px 24px; display: flex; flex-direction: column; gap: 24px">
+      <h1 style="margin: 0; font-size: 30px; line-height: 38px; font-weight: 600; letter-spacing: -0.02em; color: var(--color-text-primary)">Your location has</h1>
+
+      <section aria-label="Pickup queue" style="border-radius: 20px; background: var(--color-bg-brand-solid); padding: 18px 16px 18px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 20px -6px rgba(53, 98, 110, 0.45)">
+        <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-primary_on-brand)">
+            <span class="live-dot" aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: #47CD89"></span>Live · Pickup queue
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 8px; color: var(--color-text-primary_on-brand)">
+            <span style="font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">{{m.inQueue}}</span>
+            <span style="font-size: 17px; line-height: 24px; font-weight: 500">waiting</span>
+          </div>
+          <div style="font-size: 14px; line-height: 20px; color: var(--color-text-secondary_on-brand)">{{m.longestLine}}</div>
+        </div>
+        <x-import component-from-global-scope="UntitledUI.Button" color="secondary" size="lg" icon-trailing="{{ic.ChevronRight}}" on-press="{{openQueue}}">Open</x-import>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <div style="padding: 0 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-error-primary)">Needs attention</div>
+        <div style="border-radius: 12px; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary); overflow: hidden">
+          <button type="button" class="row-btn" onClick="{{dead}}" style="width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer">
+            <x-import component-from-global-scope="UntitledUI.FeaturedIcon" icon="{{ic.AlertTriangle}}" color="error" theme="light" size="md"></x-import>
+            <span style="flex: 1 1 auto; font-size: 16px; line-height: 24px; font-weight: 500; color: var(--color-text-primary)">Research required</span>
+            <x-import component-from-global-scope="UntitledUI.Badge" type="pill-color" color="error" size="md">13</x-import>
+            <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.ChevronRight" class="size-5" aria-hidden="true"></x-import></span>
+          </button>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <div style="padding: 0 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">Inbound</div>
+        <div style="border-radius: 12px; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary); overflow: hidden">
+          <sc-for list="{{homeIn}}" as="r" hint-placeholder-count="4">
+            <button type="button" class="row-btn" onClick="{{dead}}" style="position: relative; width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer">
+              <x-import component-from-global-scope="UntitledUI.FeaturedIcon" icon="{{r.icon}}" color="gray" theme="light" size="md"></x-import>
+              <span style="flex: 1 1 auto; font-size: 16px; line-height: 24px; font-weight: 500; color: var(--color-text-primary)">{{r.label}}</span>
+              <span style="font-size: 20px; line-height: 30px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-primary)">{{r.n}}</span>
+              <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.ChevronRight" class="size-5" aria-hidden="true"></x-import></span>
+              <span aria-hidden="true" style="position: absolute; left: 68px; right: 0; top: 0; height: 1px; background: {{r.rule}}"></span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <div style="padding: 0 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">Outbound</div>
+        <div style="border-radius: 12px; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary); overflow: hidden">
+          <button type="button" class="row-btn" onClick="{{dead}}" style="width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer">
+            <x-import component-from-global-scope="UntitledUI.FeaturedIcon" icon="{{ic.Send01}}" color="gray" theme="light" size="md"></x-import>
+            <span style="flex: 1 1 auto; font-size: 16px; line-height: 24px; font-weight: 500; color: var(--color-text-primary)">Ready to ship</span>
+            <span style="font-size: 20px; line-height: 30px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-primary)">87</span>
+            <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.ChevronRight" class="size-5" aria-hidden="true"></x-import></span>
+          </button>
+        </div>
+      </section>
+    </main>
+  </sc-if>
+
+  <!-- ============ INBOUND ============ -->
+  <sc-if value="{{f.inbound}}" hint-placeholder-val="{{false}}">
+    <header style="flex: 0 0 auto; position: relative; z-index: 5; background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 1px 0 rgba(10, 13, 18, 0.06); display: flex; flex-direction: column; padding-top: 47px">
+      <div style="display: flex; align-items: center; gap: 4px; height: 44px; padding: 0 16px 0 4px">
+        <button type="button" class="nav-btn row-btn" aria-label="Menu" onClick="{{dead}}" style="width: 44px; height: 44px; flex: 0 0 auto; border: 0; border-radius: 8px; background: none; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--color-fg-secondary); cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.Menu01" class="size-6" aria-hidden="true"></x-import></button>
+        <h1 style="flex: 1 1 auto; margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; color: var(--color-text-primary)">Inbound</h1>
+      </div>
+      <nav class="hscroll" role="tablist" aria-label="Inbound" style="display: flex; gap: 22px; padding: 0 16px; overflow-x: auto">
+        <sc-for list="{{inTabs}}" as="t" hint-placeholder-count="4">
+          <button type="button" role="tab" class="tab-btn" aria-selected="{{t.sel}}" onClick="{{t.go}}" style="flex: 0 0 auto; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 2px; border: 0; border-bottom: 2px solid {{t.line}}; background: none; font: inherit; font-size: 15px; line-height: 20px; font-weight: 600; color: {{t.color}}; white-space: nowrap; cursor: pointer">{{t.label}}
+            <sc-if value="{{t.hasCount}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Badge" type="pill-color" color="brand" size="sm">{{t.count}}</x-import></sc-if>
+          </button>
+        </sc-for>
+      </nav>
+    </header>
+
+    <sc-if value="{{f.inbox}}" hint-placeholder-val="{{false}}">
+      <main style="flex: 1 1 auto; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; font-size: 15px; line-height: 22px; color: var(--color-text-tertiary)">Inbox isn’t part of this prototype. Open the Pickup Queue tab.</main>
+    </sc-if>
+
+    <!-- ---------- Pickup Queue tab ---------- -->
+    <sc-if value="{{f.pickup}}" hint-placeholder-val="{{false}}">
+      <main class="scroll" ref="{{refs.queueMain}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 16px {{kb.pad}}; display: flex; flex-direction: column; gap: 16px">
+
+        <sc-if value="{{f.offline}}" hint-placeholder-val="{{false}}">
+          <div role="status" style="display: flex; gap: 12px; padding: 12px 14px; border-radius: 16px; background: var(--color-bg-warning-primary); box-shadow: 0 0 0 1px var(--color-border-warning_subtle, #FEDF89)">
+            <span style="display: flex; color: var(--color-fg-warning-primary)"><x-import component-from-global-scope="UntitledUI.Icons.WifiOff" class="size-5" aria-hidden="true"></x-import></span>
+            <div style="font-size: 14px; line-height: 20px; color: var(--color-text-secondary)"><b style="font-weight: 600; color: var(--color-text-primary)">You’re offline.</b> The queue may be out of date, so you can’t serve new students. A pickup you already started can still be completed.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{f.overview}}" hint-placeholder-val="{{true}}">
+          <!-- stats -->
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 4px 4px 0">
+            <div style="display: flex; flex-direction: column">
+              <span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">In queue</span>
+              <span style="font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-primary)">{{m.inQueue}}</span>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Longest wait</span>
+              <span style="font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-primary)">{{m.longest}}</span>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Served today</span>
+              <span style="font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-primary); white-space: nowrap"><span class="{{m.tickCls}}">{{m.served}}</span><sc-if value="{{m.hasByMe}}" hint-placeholder-val="{{true}}"><span class="{{m.byMeCls}}" style="margin-left: 6px; font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--color-text-tertiary)">· {{m.byMe}} by you</span></sc-if></span>
+            </div>
+          </div>
+
+          <!-- you're serving -->
+          <sc-if value="{{f.resume}}" hint-placeholder-val="{{false}}">
+            <div class="{{f.pulseCls}}" style="position: relative; z-index: {{f.pulseZ}}; flex-shrink: 0; display: flex; border-radius: 12px; overflow: hidden; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-brand)">
+              <sc-if value="{{mine.hasPhoto}}" hint-placeholder-val="{{true}}">
+                <button type="button" class="photo-btn" aria-label="See a larger photo of {{mine.name}}" aria-haspopup="dialog" onClick="{{mine.zoom}}" style="position: relative; flex: 0 0 120px; align-self: stretch; min-height: 184px; padding: 0; border: 0; background: var(--color-bg-secondary_hover); overflow: hidden; cursor: zoom-in">
+                  <img src="{{mine.photo}}" alt="Photo of {{mine.name}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+                  <span aria-hidden="true" style="position: absolute; right: 6px; bottom: 6px; width: 28px; height: 28px; border-radius: 9999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 1px 2px rgba(10, 13, 18, 0.15); display: flex; align-items: center; justify-content: center; color: var(--color-fg-secondary)"><x-import component-from-global-scope="UntitledUI.Icons.Expand01" class="size-4"></x-import></span>
+                </button>
+              </sc-if>
+              <sc-if value="{{mine.noPhoto}}" hint-placeholder-val="{{false}}">
+                <div role="img" aria-label="No photo on file" style="flex: 0 0 120px; align-self: stretch; min-height: 184px; background: var(--color-bg-secondary_hover); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                  <span style="font-size: 32px; line-height: 1.2; font-weight: 600; color: var(--color-text-quaternary)">{{mine.ini}}</span>
+                  <span style="font-size: 12px; line-height: 18px; font-weight: 500; color: var(--color-text-quaternary)">No photo</span>
+                </div>
+              </sc-if>
+              <button type="button" class="nav-btn row-btn" aria-label="Move {{mine.t}} to a window" onClick="{{mv.openMine}}" style="position: absolute; top: 4px; right: 4px; z-index: 1; width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--color-fg-quaternary); cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.SwitchHorizontal01" class="size-5" aria-hidden="true"></x-import></button>
+              <div style="flex: 1 1 auto; min-width: 0; padding: 14px 14px 14px 16px; display: flex; flex-direction: column">
+                <div style="padding-right: 32px; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--color-text-brand-secondary)">You’re serving · {{mine.timer}}</div>
+                <div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-brand-secondary)">{{mine.t}}</div>
+                <div style="font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{mine.name}}</div>
+                <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{mine.progress}}</div>
+                <div class="fullw" style="width: 100%; margin-top: auto; padding-top: 12px"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" on-press="{{resume}}">Resume</x-import></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- up next -->
+          <sc-if value="{{f.upNext}}" hint-placeholder-val="{{true}}">
+            <section aria-label="Up next" class="{{m.upCls}}" style="position: relative; flex-shrink: 0; display: flex; border-radius: 12px; overflow: hidden; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary)">
+              <sc-if value="{{up.hasPhoto}}" hint-placeholder-val="{{true}}">
+                <button type="button" class="photo-btn" aria-label="See a larger photo of {{up.name}}" aria-haspopup="dialog" onClick="{{up.zoom}}" style="position: relative; flex: 0 0 120px; align-self: stretch; min-height: 184px; padding: 0; border: 0; background: var(--color-bg-secondary_hover); overflow: hidden; cursor: zoom-in">
+                  <img src="{{up.photo}}" alt="Photo of {{up.name}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+                  <span aria-hidden="true" style="position: absolute; right: 6px; bottom: 6px; width: 28px; height: 28px; border-radius: 9999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 1px 2px rgba(10, 13, 18, 0.15); display: flex; align-items: center; justify-content: center; color: var(--color-fg-secondary)"><x-import component-from-global-scope="UntitledUI.Icons.Expand01" class="size-4"></x-import></span>
+                </button>
+              </sc-if>
+              <sc-if value="{{up.noPhoto}}" hint-placeholder-val="{{false}}">
+                <div role="img" aria-label="No photo on file" style="flex: 0 0 120px; align-self: stretch; min-height: 184px; background: var(--color-bg-secondary_hover); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                  <span style="font-size: 32px; line-height: 1.2; font-weight: 600; color: var(--color-text-quaternary)">{{up.ini}}</span>
+                  <span style="font-size: 12px; line-height: 18px; font-weight: 500; color: var(--color-text-quaternary)">No photo</span>
+                </div>
+              </sc-if>
+              <button type="button" class="nav-btn row-btn" aria-label="Move {{up.t}} to a window" onClick="{{mv.openUp}}" style="position: absolute; top: 4px; right: 4px; z-index: 1; width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--color-fg-quaternary); cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.SwitchHorizontal01" class="size-5" aria-hidden="true"></x-import></button>
+              <div style="flex: 1 1 auto; min-width: 0; padding: 14px 14px 14px 16px; display: flex; flex-direction: column">
+                <div style="padding-right: 32px; font-size: 13px; line-height: 20px; font-weight: 600; color: {{up.waitFg}}">Up next · waiting {{up.wait}}</div>
+                <div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-brand-secondary)">{{up.t}}</div>
+                <div style="font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{up.name}}</div>
+                <sc-if value="{{up.guest}}" hint-placeholder-val="{{false}}"><div style="display: flex; margin: 2px 0"><x-import component-from-global-scope="UntitledUI.Badge" type="pill-color" color="gray" size="sm">Guest</x-import></div></sc-if>
+                <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{up.pkLine}}</div>
+                <div class="fullw" style="width: 100%; margin-top: auto; padding-top: 12px"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{f.offline}}" on-press="{{serveNext}}" style="width: 100%">Serve next</x-import></div>
+              </div>
+            </section>
+          </sc-if>
+
+          <!-- segmented control (iOS style, hand-built from tokens) -->
+          <div role="tablist" aria-label="Pickup queue" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 12px; background: rgba(118, 118, 128, 0.12)">
+            <sc-for list="{{qTabs}}" as="t" hint-placeholder-count="3">
+              <button type="button" role="tab" class="tab-btn" aria-selected="{{t.sel}}" onClick="{{t.go}}" style="display: flex; align-items: center; justify-content: center; gap: 6px; height: 38px; border: 0; border-radius: 9px; background: {{t.bg}}; box-shadow: {{t.shadow}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 600; color: {{t.color}}; cursor: pointer">{{t.label}}<span style="font-size: 12px; font-weight: 500; color: var(--color-text-quaternary); font-variant-numeric: tabular-nums">{{t.count}}</span></button>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- search with trailing "Scan ID" button: Untitled UI InputGroup + InputBase, trailing addon is an Untitled Button -->
+        <!-- While typing, the same row anchors just above the keyboard so the field stays in view. -->
+        <div style="display: flex; gap: 8px; align-items: center; position: {{search.pos}}; left: 0; right: 0; bottom: 336px; z-index: {{search.z}}; padding: {{search.pad}}; background: {{search.rowBg}}; box-shadow: {{search.rowShadow}}">
+          <div onFocus="{{kb.focusSearch}}" onBlur="{{kb.blurSearch}}" style="flex: 1 1 auto; min-width: 0">
+            <x-import component-from-global-scope="UntitledUI.InputGroup" size="lg" aria-label="{{search.label}}" value="{{search.q}}" on-change="{{search.set}}" trailing-addon="{{search.addon}}">
+              <x-import component-from-global-scope="UntitledUI.InputBase" size="lg" placeholder="{{search.label}}" icon="{{ic.SearchLg}}"></x-import>
+            </x-import>
+          </div>
+          <sc-if value="{{f.searchFocus}}" hint-placeholder-val="{{false}}">
+            <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" on-press="{{search.cancel}}" style="margin-right: -12px">Cancel</x-import>
+          </sc-if>
+        </div>
+
+        <!-- CHECKED IN -->
+        <sc-if value="{{f.tabQueue}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; align-items: center; gap: 8px; padding-left: 4px">
+              <span style="flex: 1 1 auto; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">{{list.heading}}</span>
+              <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.UserPlus01}}" on-press="{{openCheckIn}}" style="margin-right: -12px">Check in</x-import>
+            </div>
+            <sc-if value="{{list.has}}" hint-placeholder-val="{{true}}">
+              <div style="margin: 0 -16px; background: var(--color-bg-primary); border-top: 1px solid var(--color-border-secondary); border-bottom: 1px solid var(--color-border-secondary)">
+                <sc-for list="{{list.rows}}" as="r" hint-placeholder-count="4">
+                  <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 4px 10px 16px">
+                    <x-import component-from-global-scope="UntitledUI.Avatar" size="md" src="{{r.photo}}" initials="{{r.ini}}" alt="{{r.name}}"></x-import>
+                    <div style="flex: 1 1 auto; min-width: 0">
+                      <div style="display: flex; align-items: baseline; gap: 8px; min-width: 0">
+                        <span style="flex: 0 0 auto; font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-tertiary)">{{r.t}}</span>
+                        <span style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.name}}</span><sc-if value="{{r.guest}}" hint-placeholder-val="{{false}}"><span style="flex: 0 0 auto; display: flex; align-self: center"><x-import component-from-global-scope="UntitledUI.Badge" type="pill-color" color="gray" size="sm">Guest</x-import></span></sc-if>
+                      </div>
+                      <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap"><span style="font-weight: 500; color: {{r.waitFg}}">{{r.wait}}</span> · {{r.pkShort}}</div>
+                    </div>
+                    <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.ArrowUp}}" is-disabled="{{f.offline}}" on-press="{{r.serve}}" aria-label="Serve {{r.t}} {{r.name}}">Serve</x-import>
+                    <span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 1px; background: {{r.rule}}"></span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{list.emptyQueue}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 16px; text-align: center; border-radius: 12px; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary)">
+                <x-import component-from-global-scope="UntitledUI.FeaturedIcon" icon="{{ic.CheckCircle}}" color="success" theme="light" size="lg"></x-import>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-size: 17px; line-height: 24px; font-weight: 600; color: var(--color-text-primary)">You’re all caught up</div>
+                  <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Students appear here as soon as they check in on the app or kiosk.</div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{list.noMatch}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 16px; text-align: center">
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-size: 17px; line-height: 24px; font-weight: 600; color: var(--color-text-primary)">No one in line matches “{{search.q}}”</div>
+                  <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Try another spelling, check Completed, or check them in if they have packages ready.</div>
+                </div>
+                <x-import component-from-global-scope="UntitledUI.Button" color="secondary" size="lg" icon-leading="{{ic.UserPlus01}}" on-press="{{openCheckIn}}">Check in</x-import>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- SERVING -->
+        <sc-if value="{{f.tabServing}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="padding-left: 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">Being served now</span>
+            <sc-if value="{{serving.has}}" hint-placeholder-val="{{true}}">
+              <div style="margin: 0 -16px; background: var(--color-bg-primary); border-top: 1px solid var(--color-border-secondary); border-bottom: 1px solid var(--color-border-secondary)">
+                <sc-for list="{{serving.rows}}" as="r" hint-placeholder-count="3">
+                  <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 4px 10px 16px; min-height: 64px; box-sizing: border-box">
+                    <x-import component-from-global-scope="UntitledUI.Avatar" size="md" src="{{r.photo}}" initials="{{r.ini}}" alt="{{r.name}}"></x-import>
+                    <div style="flex: 1 1 auto; min-width: 0">
+                      <div style="display: flex; align-items: baseline; gap: 8px">
+                        <span style="flex: 0 0 auto; font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-tertiary)">{{r.t}}</span>
+                        <span style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.name}}</span>
+                      </div>
+                      <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{r.by}} · {{r.timer}}</div>
+                    </div>
+                    <sc-if value="{{r.mine}}" hint-placeholder-val="{{false}}">
+                      <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" on-press="{{resume}}">Resume</x-import>
+                    </sc-if>
+                    <span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 1px; background: {{r.rule}}"></span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{serving.none}}" hint-placeholder-val="{{false}}">
+              <div style="padding: 28px 16px; text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{serving.noneText}}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- COMPLETED -->
+        <sc-if value="{{f.tabDone}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="padding-left: 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">{{done.heading}}</span>
+            <sc-if value="{{done.has}}" hint-placeholder-val="{{true}}">
+              <div style="margin: 0 -16px; background: var(--color-bg-primary); border-top: 1px solid var(--color-border-secondary); border-bottom: 1px solid var(--color-border-secondary)">
+                <sc-for list="{{done.rows}}" as="c" hint-placeholder-count="3">
+                  <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 4px 10px 16px">
+                    <x-import component-from-global-scope="UntitledUI.Avatar" size="md" src="{{c.photo}}" initials="{{c.ini}}" alt="{{c.name}}"></x-import>
+                    <div style="flex: 1 1 auto; min-width: 0">
+                      <div style="display: flex; align-items: baseline; gap: 8px">
+                        <span style="flex: 0 0 auto; font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-tertiary)">{{c.t}}</span>
+                        <span style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{c.name}}</span>
+                      </div>
+                      <sc-if value="{{c.hasPx}}" hint-placeholder-val="{{false}}"><div style="font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{c.pxText}}</div></sc-if>
+                      <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{c.line}}</div>
+                      <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{c.proof}}</div>
+                      <sc-if value="{{c.pending}}" hint-placeholder-val="{{false}}">
+                        <div style="margin-top: 4px"><x-import component-from-global-scope="UntitledUI.BadgeWithIcon" type="pill-color" color="warning" size="sm" icon-leading="{{ic.WifiOff}}">Uploads when you’re back online</x-import></div>
+                      </sc-if>
+                    </div>
+                    <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Printer}}" on-press="{{c.print}}" aria-label="Print receipt for {{c.t}} {{c.name}}">Receipt</x-import>
+                    <span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 1px; background: {{c.rule}}"></span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{done.none}}" hint-placeholder-val="{{false}}">
+              <div style="padding: 28px 16px; text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{done.noneText}}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </main>
+    </sc-if>
+  </sc-if>
+
+  <!-- ============ BOTTOM BAR (existing app shell) ============ -->
+  <sc-if value="{{f.bar}}" hint-placeholder-val="{{true}}">
+    <nav aria-label="Main" style="flex: 0 0 auto; position: relative; z-index: 5; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; height: 83px; box-sizing: border-box; padding: 0 4px 34px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 -1px 0 rgba(10, 13, 18, 0.06)">
+      <button type="button" class="nav-btn" aria-current="{{bar.home.cur}}" onClick="{{bar.home.go}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 49px; padding: 0; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 11px; line-height: 14px; font-weight: 600; color: {{bar.home.color}}; cursor: pointer">
+        <x-import component-from-global-scope="UntitledUI.Icons.Home02" class="size-6" aria-hidden="true"></x-import>Home
+      </button>
+      <button type="button" class="nav-btn" aria-current="{{bar.inbound.cur}}" onClick="{{bar.inbound.go}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 49px; padding: 0; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 11px; line-height: 14px; font-weight: 600; color: {{bar.inbound.color}}; cursor: pointer">
+        <x-import component-from-global-scope="UntitledUI.Icons.Package" class="size-6" aria-hidden="true"></x-import>Inbound
+      </button>
+      <div style="display: flex; justify-content: center">
+        <button type="button" class="fab" aria-label="New action" onClick="{{dead}}" style="width: 56px; height: 56px; margin-top: -20px; border-radius: 9999px; border: 0; background: var(--color-bg-brand-solid); color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px -4px rgba(53, 98, 110, 0.45); cursor: pointer">
+          <x-import component-from-global-scope="UntitledUI.Icons.Plus" class="size-6" aria-hidden="true"></x-import>
+        </button>
+      </div>
+      <button type="button" class="nav-btn" aria-current="{{bar.outbound.cur}}" onClick="{{bar.outbound.go}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 49px; padding: 0; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 11px; line-height: 14px; font-weight: 600; color: {{bar.outbound.color}}; cursor: pointer">
+        <x-import component-from-global-scope="UntitledUI.Icons.Send01" class="size-6" aria-hidden="true"></x-import>Outbound
+      </button>
+      <button type="button" class="nav-btn" aria-current="{{bar.routes.cur}}" onClick="{{bar.routes.go}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 49px; padding: 0; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 11px; line-height: 14px; font-weight: 600; color: {{bar.routes.color}}; cursor: pointer">
+        <x-import component-from-global-scope="UntitledUI.Icons.Truck01" class="size-6" aria-hidden="true"></x-import>Routes
+      </button>
+    </nav>
+  </sc-if>
+
+  <!-- ============ SERVE SCREEN ============ -->
+  <sc-if value="{{f.serve}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; background: var(--color-bg-primary)">
+      <header style="flex: 0 0 auto; position: relative; z-index: 2; display: flex; align-items: center; gap: 4px; height: 91px; box-sizing: border-box; padding: 47px 16px 0 4px; background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 1px 0 rgba(10, 13, 18, 0.06)">
+        <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.ChevronLeft}}" aria-label="Back to the queue" on-press="{{backToQueue}}"></x-import>
+        <h1 style="flex: 1 1 auto; margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; color: var(--color-text-primary)">Serving {{mine.t}}</h1>
+        <x-import component-from-global-scope="UntitledUI.BadgeWithIcon" type="pill-color" color="gray" size="md" icon-leading="{{ic.Clock}}">{{mine.timer}}</x-import>
+      </header>
+
+      <sc-if value="{{mine.spotOn}}" hint-placeholder-val="{{false}}">
+        <div class="spot-in" aria-hidden="true" onClick="{{endSpot}}" style="position: absolute; inset: 0; z-index: 3; background: rgba(10, 13, 18, 0.2)"></div>
+      </sc-if>
+      <main class="scroll" ref="{{refs.serveMain}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px">
+        <sc-if value="{{f.offline}}" hint-placeholder-val="{{false}}">
+          <div role="status" style="display: flex; gap: 12px; padding: 12px 14px; border-radius: 16px; background: var(--color-bg-warning-primary); box-shadow: 0 0 0 1px var(--color-border-warning_subtle, #FEDF89)">
+            <span style="display: flex; color: var(--color-fg-warning-primary)"><x-import component-from-global-scope="UntitledUI.Icons.WifiOff" class="size-5" aria-hidden="true"></x-import></span>
+            <div style="font-size: 14px; line-height: 20px; color: var(--color-text-secondary)"><b style="font-weight: 600; color: var(--color-text-primary)">You’re offline.</b> You can finish this pickup. It uploads when you reconnect.</div>
+          </div>
+        </sc-if>
+
+        <!-- student -->
+        <section style="position: relative; flex-shrink: 0; display: flex; border-radius: 12px; overflow: hidden; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary)">
+              <sc-if value="{{mine.hasPhoto}}" hint-placeholder-val="{{true}}">
+                <button type="button" class="photo-btn" aria-label="See a larger photo of {{mine.name}}" aria-haspopup="dialog" onClick="{{mine.zoom}}" style="position: relative; flex: 0 0 124px; align-self: stretch; min-height: 164px; padding: 0; border: 0; background: var(--color-bg-secondary_hover); overflow: hidden; cursor: zoom-in">
+                  <img src="{{mine.photo}}" alt="Photo of {{mine.name}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+                  <span aria-hidden="true" style="position: absolute; right: 6px; bottom: 6px; width: 28px; height: 28px; border-radius: 9999px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 1px 2px rgba(10, 13, 18, 0.15); display: flex; align-items: center; justify-content: center; color: var(--color-fg-secondary)"><x-import component-from-global-scope="UntitledUI.Icons.Expand01" class="size-4"></x-import></span>
+                </button>
+              </sc-if>
+              <sc-if value="{{mine.noPhoto}}" hint-placeholder-val="{{false}}">
+                <div role="img" aria-label="No photo on file" style="flex: 0 0 124px; align-self: stretch; min-height: 164px; background: var(--color-bg-secondary_hover); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                  <span style="font-size: 34px; line-height: 1.2; font-weight: 600; color: var(--color-text-quaternary)">{{mine.ini}}</span>
+                  <span style="font-size: 12px; line-height: 18px; font-weight: 500; color: var(--color-text-quaternary)">No photo</span>
+                </div>
+              </sc-if>
+          <button type="button" class="nav-btn row-btn" aria-label="Move {{mine.t}} to a window" onClick="{{mv.openMine}}" style="position: absolute; top: 4px; right: 4px; z-index: 1; width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--color-fg-quaternary); cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.SwitchHorizontal01" class="size-5" aria-hidden="true"></x-import></button>
+          <div style="flex: 1 1 auto; min-width: 0; padding: 14px 14px 8px 16px; display: flex; flex-direction: column">
+            <sc-if value="{{mine.guest}}" hint-placeholder-val="{{false}}"><div style="display: flex; margin-bottom: 4px"><x-import component-from-global-scope="UntitledUI.Badge" type="pill-color" color="gray" size="sm">Guest</x-import></div></sc-if>
+            <div style="padding-right: 32px; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; color: var(--color-text-primary)">{{mine.name}}</div>
+            <sc-if value="{{mine.pxOn}}" hint-placeholder-val="{{false}}"><div style="font-size: 13px; line-height: 20px; font-weight: 600; color: var(--color-text-brand-secondary)">{{mine.pxHeader}}</div></sc-if>
+            <sc-if value="{{mine.notGuest}}" hint-placeholder-val="{{true}}">
+            <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Student ID {{mine.sid}}</div>
+            <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{mine.mail}}</div>
+            </sc-if>
+            <sc-if value="{{mine.guest}}" hint-placeholder-val="{{false}}"><div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Check a photo ID</div></sc-if>
+            <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Lobby TV: {{mine.t}} · See John</div>
+            <div style="display: flex; padding-top: 4px"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Announcement02}}" is-disabled="{{mine.annBusy}}" on-press="{{announce}}" style="margin-left: -12px">{{mine.annLabel}}</x-import></div>
+          </div>
+        </section>
+
+        <!-- Guest: find who they're picking up for (shared rules). Steps stay hidden until a student is added. -->
+        <sc-if value="{{mine.gNone}}" hint-placeholder-val="{{false}}">
+          <section aria-labelledby="g-who" style="flex-shrink: 0; border-radius: 12px; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary); padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div>
+              <h2 id="g-who" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; color: var(--color-text-primary)">{{mine.gWho}}</h2>
+              <p style="margin: 2px 0 0; font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{mine.gWhoHint}}</p>
+            </div>
+            <div class="fullw" style="width: 100%"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" icon-leading="{{ic.SearchLg}}" is-disabled="{{f.offline}}" on-press="{{guest.open}}">Find a student</x-import></div>
+            <div class="fullw" style="width: 100%"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary-destructive" size="lg" icon-leading="{{ic.Trash01}}" on-press="{{guest.remove}}">Remove from queue</x-import></div>
+          </section>
+        </sc-if>
+        <sc-if value="{{mine.gSome}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; margin: -4px 0"><x-import component-from-global-scope="UntitledUI.Button" color="link-color" size="lg" icon-leading="{{ic.Plus}}" on-press="{{guest.open}}">Add another student</x-import></div>
+        </sc-if>
+        <!-- the two steps, each its own card (like the web's Items and Identity) -->
+        <div style="display: {{mine.stepsDisp}}; flex-direction: column; gap: 16px; flex-shrink: 0">
+        <!-- step 1: pull packages (like the web: items first, identity gate at the end) -->
+        <section class="step {{mine.spot1}}" ref="{{refs.step1}}" style="position: relative; z-index: {{mine.spot1z}}; background: var(--color-bg-primary); padding: 16px; display: flex; flex-direction: column; gap: 6px; border-radius: 12px; box-shadow: 0 0 0 1px var(--color-border-secondary)">
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="width: 32px; height: 32px; flex: 0 0 auto; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; background: {{mine.k1bg}}; box-shadow: {{mine.k1ring}}; color: {{mine.k1fg}}"><sc-if value="{{mine.allScanned}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.Check" class="size-5" aria-label="Done"></x-import></sc-if><sc-if value="{{mine.moreToScan}}" hint-placeholder-val="{{true}}">1</sc-if></span>
+            <h2 style="flex: 1 1 auto; margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; color: {{mine.k1title}}">Pull packages</h2>
+            <span style="font-size: 13px; line-height: 20px; font-variant-numeric: tabular-nums; color: var(--color-text-tertiary)">{{mine.scanCount}}</span>
+          </div>
+          <div class="stepfull" style="display: flex; flex-direction: column">
+            <sc-for list="{{mine.items}}" as="it" hint-placeholder-count="3">
+              <sc-if value="{{it.grpOn}}" hint-placeholder-val="{{false}}"><div style="margin-top: {{it.mt}}; padding: 0 4px 0 12px; min-height: 36px; display: flex; align-items: center; background: var(--color-bg-secondary); border: 1px solid var(--color-border-secondary); border-radius: 12px 12px 0 0"><span role="heading" aria-level="3" style="flex: 1 1 auto; padding: 8px 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary)">{{it.grpLabel}}</span><sc-if value="{{it.grpRm}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" aria-label="{{it.grpRmLabel}}" on-press="{{it.grpRemove}}">Remove</x-import></sc-if></div></sc-if>
+              <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 8px; margin-top: {{it.rmt}}; border: 1px solid var(--color-border-secondary); border-top: {{it.rTop}}; border-radius: {{it.rRad}}">
+                <span style="width: 32px; flex: 0 0 32px; display: flex; justify-content: center; color: {{it.fg}}"><sc-if value="{{it.got}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-6" aria-hidden="true"></x-import></sc-if><sc-if value="{{it.todo}}" hint-placeholder-val="{{true}}"><x-import component-from-global-scope="UntitledUI.Icons.Package" class="size-6" aria-hidden="true"></x-import></sc-if></span>
+                <div style="flex: 1 1 auto; min-width: 0">
+                  <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: {{it.locFg}}">{{it.loc}}</div>
+                  <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{it.desc}}<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)"> · {{it.state}}</span></div>
+                </div>
+                <sc-if value="{{it.got}}" hint-placeholder-val="{{false}}">
+                  <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.XClose}}" aria-label="Remove the scan for {{it.loc}}" on-press="{{it.remove}}" style="margin: -10px -12px -10px 0"></x-import>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{mine.moreToScan}}" hint-placeholder-val="{{true}}">
+            <div class="fullw stepfull" style="width: 100%; margin-top: 4px;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="{{mine.scanBtnColor}}" size="lg" icon-leading="{{ic.Scan}}" on-press="{{scanItems}}" style="width: 100%; margin-top: 4px">{{mine.scanBtnLabel}}</x-import></div>
+          </sc-if>
+        </section>
+
+        <!-- step 2: confirm it’s them, the identity gate: scan their ID or collect a signature (web identity box) -->
+        <section class="step {{mine.spot2}}" ref="{{refs.step2}}" style="position: relative; z-index: {{mine.spot2z}}; background: var(--color-bg-primary); padding: 16px; display: flex; flex-direction: column; gap: 10px; border-radius: 12px; box-shadow: 0 0 0 1px var(--color-border-secondary)">
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="width: 32px; height: 32px; flex: 0 0 auto; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; background: {{mine.k2bg}}; box-shadow: {{mine.k2ring}}; color: {{mine.k2fg}}"><sc-if value="{{mine.proofOk}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.Check" class="size-5" aria-label="Done"></x-import></sc-if><sc-if value="{{mine.proofNo}}" hint-placeholder-val="{{true}}">2</sc-if></span>
+            <h2 style="flex: 1 1 auto; margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; color: {{mine.k2title}}">Confirm it’s them</h2>
+          </div>
+          <sc-if value="{{mine.proofById}}" hint-placeholder-val="{{false}}">
+            <div class="stepfull" style="display: flex; gap: 12px; align-items: flex-start">
+              <span style="width: 32px; flex: 0 0 32px; display: flex; justify-content: center; color: var(--color-fg-success-primary)"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-5" aria-hidden="true"></x-import></span>
+              <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)"><b style="font-weight: 600; color: var(--color-text-primary)">{{mine.idWord}} · {{mine.idAt}}</b><br>{{mine.idDoneHint}} No signature needed.</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{mine.signed}}" hint-placeholder-val="{{false}}">
+            <div style="border-radius: 12px; background: var(--color-bg-secondary); height: 96px; overflow: hidden">
+              <svg viewBox="0 0 326 200" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Signature of {{mine.name}}" style="width: 100%; height: 100%; display: block"><path d="{{mine.sigD}}" fill="none" stroke="#181D27" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="flex: 1 1 auto; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Signed by {{mine.name}} · {{mine.sigAt}}</span>
+              <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" on-press="{{openSign}}" style="margin-right: -12px">Sign again</x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{mine.skipped}}" hint-placeholder-val="{{false}}">
+            <div class="stepfull" style="display: flex; gap: 12px; align-items: flex-start">
+              <span style="width: 32px; flex: 0 0 32px; display: flex; justify-content: center; color: var(--color-fg-warning-primary)"><x-import component-from-global-scope="UntitledUI.Icons.AlertTriangle" class="size-5" aria-hidden="true"></x-import></span>
+              <div style="flex: 1 1 auto; font-size: 14px; line-height: 20px; color: var(--color-text-secondary)"><b style="font-weight: 600; color: var(--color-text-primary)">Signature skipped</b><br>“{{mine.note}}”</div>
+              <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" on-press="{{undoSkip}}" style="margin: -10px -12px 0 0">Undo</x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{mine.proofTodo}}" hint-placeholder-val="{{true}}">
+            <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{mine.idHint}}</div>
+            <sc-if value="{{mine.idLocked}}" hint-placeholder-val="{{false}}">
+              <div class="stepfull" role="note" style="display: flex; align-items: center; gap: 12px; margin-top: 6px; padding: 16px; border-radius: 12px; border: 1px dashed var(--color-border-secondary); background: var(--color-bg-primary)">
+                <span style="display: flex; flex: 0 0 auto; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Lock01" class="size-5" aria-hidden="true"></x-import></span>
+                <span style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{mine.lockText}}</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{mine.idUnlocked}}" hint-placeholder-val="{{true}}">
+            <div class="stepfull" style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px">
+              <sc-if value="{{mine.canScanId}}" hint-placeholder-val="{{true}}"><div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" icon-leading="{{ic.Scan}}" on-press="{{scanId}}">Scan ID</x-import></div></sc-if>
+              <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" icon-leading="{{ic.Edit05}}" on-press="{{openSign}}">Collect signature</x-import></div>
+            </div>
+            <div class="stepfull" style="display: flex; justify-content: center; margin-bottom: -6px"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" on-press="{{openSkip}}">{{mine.skipLabel}}</x-import></div>
+            </sc-if>
+          </sc-if>
+        </section>
+        </div>
+      </main>
+
+      <footer style="flex: 0 0 auto; position: relative; z-index: 2; padding: 12px 16px 34px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 -1px 0 rgba(10, 13, 18, 0.06); display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <sc-if value="{{mine.notPicked}}" hint-placeholder-val="{{true}}">
+          <div class="fullw" style="width: 100%; opacity: {{mine.completeOpacity}}"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" aria-disabled="{{mine.cantComplete}}" on-press="{{tryComplete}}">{{mine.completeLabel}}</x-import></div>
+          </sc-if>
+          <sc-if value="{{mine.picked}}" hint-placeholder-val="{{false}}">
+            <div role="status" class="picked" style="height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--color-bg-success-solid); color: #FFFFFF; font-size: 16px; line-height: 24px; font-weight: 600; box-shadow: var(--shadow-xs)"><span class="picked-ic" style="display: flex"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-5" aria-hidden="true"></x-import></span>Picked up</div>
+          </sc-if>
+          <div style="display: flex; justify-content: center; margin-bottom: -6px; visibility: {{mine.relVis}}"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" is-disabled="{{mine.picked}}" on-press="{{openRelease}}">Put back &amp; release</x-import></div>
+        </div>
+      </footer>
+    </div>
+  </sc-if>
+
+  <!-- ============ CAMERA ============ -->
+  <sc-if value="{{f.cam}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: #0C0E12; color: #FFFFFF">
+      <header style="flex: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 91px; box-sizing: border-box; padding: 47px 16px 0">
+        <button type="button" class="nav-btn" aria-label="Close camera" onClick="{{closeCam}}" style="width: 44px; height: 44px; border: 0; border-radius: 9999px; background: rgba(255,255,255,0.14); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.XClose" class="size-6" aria-hidden="true"></x-import></button>
+        <div style="flex: 1 1 auto; text-align: center; font-size: 17px; line-height: 24px; font-weight: 600">{{cam.title}}</div>
+        <div style="width: 44px"></div>
+      </header>
+      <div style="flex: 1 1 auto; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 140px">
+        <div aria-hidden="true" style="position: relative; width: {{cam.boxW}}; height: {{cam.boxH}}; border-radius: 20px; box-shadow: 0 0 0 9999px rgba(12,14,18,0.55); border: 2px solid {{cam.boxColor}}">
+          <div class="scanline" style="position: absolute; left: 6%; right: 6%; height: 2px; background: {{cam.boxColor}}; opacity: 0.8"></div>
+        </div>
+        <!-- ID scans: the manual fallback sits right under the frame it's an alternative to. -->
+        <!-- One fallback for every camera: same text link, same spot (24 pt under the frame), clear of the scan sheet and alerts. What it opens depends on the screen. -->
+        <sc-if value="{{cam.anyCam}}" hint-placeholder-val="{{false}}">
+          <div class="on-dark" style="position: relative; z-index: 1; margin-top: 24px; display: flex; justify-content: center">
+            <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" on-press="{{cam.typeInstead}}">Can’t scan? Type it instead</x-import>
+          </div>
+        </sc-if>
+        <div style="position: absolute; left: 24px; right: 24px; top: 16px; text-align: center; font-size: 15px; line-height: 22px; color: rgba(255,255,255,0.82)">{{cam.hint}}</div>
+        <sc-if value="{{cam.hasAlert}}" hint-placeholder-val="{{false}}">
+          <div role="alert" style="position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; gap: 12px; padding: 14px; border-radius: 16px; background: var(--color-bg-primary); box-shadow: var(--shadow-lg); color: var(--color-text-secondary)">
+            <span style="display: flex; color: var(--color-fg-error-primary)"><x-import component-from-global-scope="UntitledUI.Icons.AlertCircle" class="size-5" aria-hidden="true"></x-import></span>
+            <div style="flex: 1 1 auto; font-size: 14px; line-height: 20px"><b style="font-weight: 600; color: var(--color-text-primary)">{{cam.alertTitle}}</b><br>{{cam.alertText}}</div>
+            <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.XClose}}" aria-label="Dismiss" on-press="{{clearCamAlert}}" style="margin: -10px -10px -10px 0"></x-import>
+          </div>
+        </sc-if>
+        <sc-if value="{{cam.hasFlash}}" hint-placeholder-val="{{false}}">
+          <div style="position: absolute; left: 0; right: 0; bottom: 20px; display: flex; justify-content: center">
+            <x-import component-from-global-scope="UntitledMobile.Toast" text="{{cam.flash}}" variant="success"></x-import>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{cam.items}}" hint-placeholder-val="{{true}}">
+        <!-- Package scan sheet (same pattern as the app's interoffice scan): collapsed = progress, expanded = full list. -->
+        <sc-if value="{{cs.open}}" hint-placeholder-val="{{false}}">
+          <div aria-hidden="true" onClick="{{cs.collapse}}" style="position: absolute; inset: 0; z-index: 4; background: rgba(10, 13, 18, 0.4)"></div>
+        </sc-if>
+        <div style="flex: 0 0 auto; position: {{cs.pos}}; left: 0; right: 0; top: {{cs.top}}; bottom: 0; z-index: 5; display: flex; flex-direction: column; padding: 0 16px 34px; border-radius: 20px 20px 0 0; background: var(--color-bg-primary); color: var(--color-text-primary); box-shadow: 0 -8px 24px rgba(10, 13, 18, 0.18)">
+          <sc-if value="{{cs.flashAbove}}" hint-placeholder-val="{{false}}">
+            <div style="position: absolute; left: 0; right: 0; bottom: calc(100% + 12px); display: flex; justify-content: center; pointer-events: none">
+              <x-import component-from-global-scope="UntitledMobile.Toast" text="{{cs.flash}}" variant="success"></x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{cs.flashInside}}" hint-placeholder-val="{{false}}">
+            <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 150px; z-index: 6; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 6px 4px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-bg-primary-solid); color: #FFFFFF; box-shadow: 0 20px 24px -4px rgba(10, 13, 18, 0.12), 0 8px 8px -4px rgba(10, 13, 18, 0.04)">
+              <span style="display: flex; flex: 0 0 auto; color: #75E0A7"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-5" aria-hidden="true"></x-import></span>
+              <span style="flex: 1 1 auto; min-width: 0; padding: 10px 0; font-size: 15px; line-height: 22px; font-weight: 600">{{cs.flash}}</span>
+              <sc-if value="{{cs.hasUndo}}" hint-placeholder-val="{{false}}">
+                <button type="button" class="nav-btn toast-act" onClick="{{cs.undoRemove}}" style="flex: 0 0 auto; height: 44px; min-width: 44px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Undo</button>
+              </sc-if>
+            </div>
+          </sc-if>
+          <button type="button" class="nav-btn" aria-label="{{cs.handleLabel}}" aria-expanded="{{cs.open}}" onClick="{{cs.handleClick}}" onPointerDown="{{cs.down}}" onPointerUp="{{cs.up}}" style="height: 28px; margin: 0 -16px; border: 0; background: none; padding: 0; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none">
+            <span aria-hidden="true" style="width: 36px; height: 5px; border-radius: 9999px; background: var(--color-border-primary)"></span>
+          </button>
+          <div style="font-size: 18px; line-height: 28px; font-weight: 600; margin-bottom: 12px">{{mine.name}}’s packages</div>
+          <button type="button" aria-label="{{cs.handleLabel}}" onClick="{{cs.toggle}}" style="border: 0; background: none; padding: 0; margin: 0; font: inherit; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px">
+            <x-import component-from-global-scope="UntitledUI.ProgressBar" value="{{cs.n}}" max="{{cs.total}}" progress-class-name="{{cs.barClass}}" style="width: 100%"></x-import>
+            <span style="width: 100%; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-text-tertiary)"><span>{{cs.hint}}</span><span style="font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: {{cs.countWeight}}; color: {{cs.countFg}}">{{cs.countText}}</span></span>
+          </button>
+          <sc-if value="{{cs.open}}" hint-placeholder-val="{{false}}">
+            <div class="scroll" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 12px -16px 0; padding: 0 16px; display: flex; flex-direction: column">
+              <sc-if value="{{cs.hasTodo}}" hint-placeholder-val="{{true}}">
+                <div style="padding: 6px 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">To scan · {{cs.todoN}}</div>
+                <sc-for list="{{cs.todo}}" as="it" hint-placeholder-count="3">
+                  <sc-if value="{{it.grpOn}}" hint-placeholder-val="{{false}}"><div role="heading" aria-level="3" style="margin: 10px -16px 0; padding: 8px 16px 8px 48px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border-secondary); font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary)">{{it.grpLabel}}</div></sc-if>
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 2px 0; border-top: 1px solid var(--color-border-secondary)">
+                    <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Package" class="size-5" aria-hidden="true"></x-import></span>
+                    <div style="flex: 1 1 auto; min-width: 0; padding: 8px 0">
+                      <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{it.loc}}</div>
+                      <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{it.desc}}</div>
+                    </div>
+                    <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Edit05}}" aria-label="Type the tracking number for {{it.loc}}" on-press="{{it.type}}" style="margin-right: -12px"></x-import>
+                  </div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{cs.hasDone}}" hint-placeholder-val="{{false}}">
+                <div style="padding: 14px 0 6px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-tertiary)">Scanned · {{cs.doneN}}</div>
+                <sc-for list="{{cs.done}}" as="it" hint-placeholder-count="2">
+                  <sc-if value="{{it.grpOn}}" hint-placeholder-val="{{false}}"><div role="heading" aria-level="3" style="margin: 10px -16px 0; padding: 8px 16px 8px 48px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border-secondary); font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary)">{{it.grpLabel}}</div></sc-if>
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 2px 0; border-top: 1px solid var(--color-border-secondary)">
+                    <span style="display: flex; color: var(--color-fg-success-primary)"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-5" aria-hidden="true"></x-import></span>
+                    <div style="flex: 1 1 auto; min-width: 0; padding: 8px 0">
+                      <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-tertiary)">{{it.loc}}</div>
+                      <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{it.desc}}</div>
+                    </div>
+                    <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.XClose}}" aria-label="Remove the scan for {{it.loc}}" on-press="{{it.remove}}" style="margin-right: -12px"></x-import>
+                  </div>
+                </sc-for>
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px">
+            <div class="fullw {{cs.doneCls}}" style="width: 100%; border-radius: 8px"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{cs.noScans}}" on-press="{{closeCam}}">Done</x-import></div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ SIGNATURE ============ -->
+  <sc-if value="{{f.sign}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: var(--color-bg-primary)">
+      <header style="flex: 0 0 auto; display: flex; align-items: center; gap: 4px; height: 91px; box-sizing: border-box; padding: 47px 16px 0 4px; box-shadow: 0 1px 0 rgba(10, 13, 18, 0.06)">
+        <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.XClose}}" aria-label="Cancel signature" on-press="{{closeSign}}"></x-import>
+        <h1 style="flex: 1 1 auto; margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; color: var(--color-text-primary)">Signature</h1>
+      </header>
+      <main style="flex: 1 1 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 16px">
+        <div>
+          <div style="font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em; color: var(--color-text-primary)">{{mine.name}}, please sign</div>
+          <div style="font-size: 15px; line-height: 22px; color: var(--color-text-tertiary)">To confirm you picked up {{mine.pickCount}}.</div>
+        </div>
+        <div class="pad" tabindex="0" aria-label="Signature area. Draw with your finger." onPointerDown="{{sig.down}}" onPointerMove="{{sig.move}}" onPointerUp="{{sig.up}}" onPointerLeave="{{sig.up}}" style="position: relative; height: 260px; border-radius: 16px; background: var(--color-bg-secondary); box-shadow: inset 0 0 0 1px rgba(10, 13, 18, 0.08); touch-action: none; cursor: crosshair; overflow: hidden">
+          <svg viewBox="0 0 326 200" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%"><path d="{{sig.d}}" fill="none" stroke="#181D27" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <div aria-hidden="true" style="position: absolute; left: 20px; right: 20px; bottom: 48px; border-top: 1px dashed var(--color-border-primary)"></div>
+          <div aria-hidden="true" style="position: absolute; left: 20px; bottom: 22px; font-size: 13px; line-height: 18px; color: var(--color-text-quaternary)">Sign above the line</div>
+        </div>
+        <!-- Done sits right under the pad (the phone is in the student's hands); Clear below it. -->
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px">
+          <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="xl" is-disabled="{{sig.empty}}" on-press="{{sig.done}}" style="width: 100%">Done</x-import></div>
+          <div style="display: flex; justify-content: center"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" is-disabled="{{sig.empty}}" on-press="{{sig.clear}}">Clear signature</x-import></div>
+        </div>
+      </main>
+    </div>
+  </sc-if>
+
+  <!-- ============ SHEETS (lift above the keyboard when it's open) ============ -->
+
+
+  <sc-if value="{{sh.checkin}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; left: 0; right: 0; top: 0; bottom: {{kb.lift}}; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Check in a student" full="{{true}}" top="{{56}}" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div onFocus="{{kb.focusCiIn}}" onBlur="{{kb.blurCiIn}}">
+            <x-import component-from-global-scope="UntitledUI.InputGroup" size="lg" label="Find a student with packages ready" value="{{ci.q}}" on-change="{{ci.set}}" trailing-addon="{{ci.addon}}">
+              <x-import component-from-global-scope="UntitledUI.InputBase" size="lg" placeholder="Name or ID" icon="{{ic.SearchLg}}" auto-focus="{{true}}"></x-import>
+            </x-import>
+          </div>
+          <sc-if value="{{ci.has}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-direction: column">
+              <sc-for list="{{ci.rows}}" as="w" hint-placeholder-count="3">
+                <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 0">
+                  <x-import component-from-global-scope="UntitledUI.Avatar" size="md" src="{{w.photo}}" initials="{{w.ini}}" alt="{{w.name}}"></x-import>
+                  <div style="flex: 1 1 auto; min-width: 0">
+                    <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{w.name}}</div>
+                    <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">ID {{w.sid}} · {{w.pkShort}}</div>
+                  </div>
+                  <sc-if value="{{w.ready}}" hint-placeholder-val="{{true}}">
+                    <x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" is-disabled="{{f.offline}}" on-press="{{w.checkIn}}" aria-label="Check in {{w.name}}">Check in</x-import>
+                  </sc-if>
+                  <sc-if value="{{w.inLine}}" hint-placeholder-val="{{false}}">
+                    <x-import component-from-global-scope="UntitledUI.Badge" type="pill-color" color="gray" size="md">{{w.lineLabel}}</x-import>
+                  </sc-if>
+                  <span aria-hidden="true" style="position: absolute; left: 52px; right: 0; top: 0; height: 1px; background: {{w.rule}}"></span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ci.none}}" hint-placeholder-val="{{false}}">
+            <div style="padding: 16px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">No one with packages ready matches “{{ci.q}}”.</div>
+          </sc-if>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <!-- Guest: Find a student (same rules as the web drawer search) -->
+  <sc-if value="{{sh.guest}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; left: 0; right: 0; top: 0; bottom: {{kb.lift}}; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Find a student" full="{{true}}" top="{{56}}" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{guest.intro}}</div>
+          <div onFocus="{{kb.focusGq}}" onBlur="{{kb.blurGq}}">
+            <x-import component-from-global-scope="UntitledUI.InputGroup" size="lg" label="Student name or ID" value="{{guest.q}}" on-change="{{guest.set}}">
+              <x-import component-from-global-scope="UntitledUI.InputBase" size="lg" placeholder="Student name or ID" icon="{{ic.SearchLg}}" auto-focus="{{true}}"></x-import>
+            </x-import>
+          </div>
+          <sc-if value="{{guest.hint}}" hint-placeholder-val="{{false}}">
+            <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Type at least 3 letters of a name or student ID.</div>
+          </sc-if>
+          <sc-if value="{{guest.has}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-direction: column">
+              <sc-for list="{{guest.rows}}" as="g" hint-placeholder-count="2">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--color-border-secondary)">
+                  <span style="display: flex; opacity: {{g.op}}"><x-import component-from-global-scope="UntitledUI.Avatar" size="md" initials="{{g.ini}}" alt="{{g.name}}"></x-import></span>
+                  <div style="flex: 1 1 auto; min-width: 0; opacity: {{g.op}}">
+                    <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{g.name}}</div>
+                    <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{g.sub}}</div>
+                  </div>
+                  <sc-if value="{{g.canAdd}}" hint-placeholder-val="{{true}}"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Plus}}" aria-label="{{g.addLabel}}" on-press="{{g.add}}">Add</x-import></sc-if>
+                  <sc-if value="{{g.added}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.BadgeWithIcon" type="pill-color" color="success" size="sm" icon-leading="{{ic.CheckCircle}}">Added</x-import></sc-if>
+                </div>
+              </sc-for>
+              <sc-if value="{{guest.hasMore}}" hint-placeholder-val="{{false}}">
+                <div style="padding-top: 12px; border-top: 1px solid var(--color-border-secondary); font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{guest.moreText}}</div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{guest.noMatch}}" hint-placeholder-val="{{false}}">
+            <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{guest.noMatchText}}</div>
+          </sc-if>
+          <sc-if value="{{guest.blocked}}" hint-placeholder-val="{{false}}">
+            <div role="status" style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--color-bg-secondary); font-size: 14px; line-height: 20px; color: var(--color-text-secondary)">
+              <span style="display: flex; flex: 0 0 auto; padding-top: 2px; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.InfoCircle" class="size-4" aria-hidden="true"></x-import></span>
+              <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; color: var(--color-text-primary)">{{guest.blockTitle}}</span><span>{{guest.blockText}}</span></span>
+            </div>
+          </sc-if>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{sh.skip}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; left: 0; right: 0; top: 0; bottom: {{kb.lift}}; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Skip signature" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Release the packages without a signature or ID scan. Your note is saved with the pickup.</div>
+          <div onFocus="{{kb.focusNote}}" onBlur="{{kb.blur}}">
+            <x-import component-from-global-scope="UntitledUI.TextArea" label="Why are you skipping the signature?" placeholder="e.g. Refused to sign, showed ID card" rows="{{3}}" is-required="{{true}}" auto-focus="{{true}}" value="{{skip.note}}" on-change="{{skip.set}}"></x-import>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{skip.empty}}" on-press="{{skip.confirm}}">Skip signature</x-import></div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{closeSheet}}">Cancel</x-import></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{sh.release}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Put back &amp; release" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{rel.text}}</div>
+          <sc-if value="{{rel.needsPutBack}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; background: var(--color-bg-secondary)">
+              <sc-for list="{{rel.items}}" as="it" hint-placeholder-count="2">
+                <div style="font-size: 14px; line-height: 20px; font-weight: 500; color: var(--color-text-secondary)">{{it.loc}} · {{it.short}}</div>
+              </sc-for>
+            </div>
+            <x-import component-from-global-scope="UntitledUI.Checkbox" size="md" label="These packages are back on their shelves" is-selected="{{rel.ok}}" on-change="{{rel.toggle}}"></x-import>
+          </sc-if>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{rel.blocked}}" on-press="{{rel.confirm}}">Release</x-import></div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{closeSheet}}">Keep serving</x-import></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{sh.type}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; left: 0; right: 0; top: 0; bottom: {{kb.lift}}; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="{{ty.title}}" on-close="{{closeType}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div onFocus="{{kb.focusType}}" onBlur="{{kb.blur}}">
+            <x-import component-from-global-scope="UntitledUI.Input" size="lg" label="{{ty.label}}" placeholder="{{ty.ph}}" auto-focus="{{true}}" hint="{{ty.hint}}" is-invalid="{{ty.bad}}" value="{{ty.q}}" on-change="{{ty.set}}"></x-import>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{ty.empty}}" on-press="{{ty.check}}">{{ty.btn}}</x-import></div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{closeType}}">Cancel</x-import></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <!-- Move to a window (same as the web's Move to another window) -->
+  <sc-if value="{{mv.open}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Move {{mv.ticket}} to a window" on-close="{{mv.close}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{mv.name}} will be called to the window you pick. The lobby TV updates right away.</div>
+          <div role="radiogroup" aria-label="Window" style="display: flex; flex-direction: column; gap: 8px">
+            <sc-for list="{{mv.wins}}" as="w" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{w.on}}" onClick="{{w.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; border-radius: 10px; border: 0; background: {{w.bg}}; box-shadow: {{w.ring}}; font: inherit; text-align: left; cursor: pointer">
+                <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Monitor01" class="size-5" aria-hidden="true"></x-import></span>
+                <span style="flex: 1 1 auto; font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{w.name}}</span>
+                <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: {{w.dot}}"></span>{{w.status}}</span>
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{mv.hasNote}}" hint-placeholder-val="{{false}}">
+            <div style="display: flex; gap: 10px; padding: 12px; border-radius: 10px; background: var(--color-bg-secondary); font-size: 14px; line-height: 20px; color: var(--color-text-secondary)"><span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Package" class="size-5" aria-hidden="true"></x-import></span><span>{{mv.note}}</span></div>
+          </sc-if>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{mv.noPick}}" on-press="{{mv.go}}">{{mv.goLabel}}</x-import></div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{mv.close}}">Cancel</x-import></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{sh.busy}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Finish {{busy.cur}} first" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--color-bg-secondary)">
+            <x-import component-from-global-scope="UntitledUI.Avatar" size="md" src="{{busy.photo}}" initials="{{busy.ini}}" alt="{{busy.name}}"></x-import>
+            <div style="min-width: 0">
+              <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{busy.who}}</div>
+              <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Scanned their ID · {{busy.pk}}</div>
+            </div>
+          </div>
+          <div style="text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">You’re serving {{busy.curName}}. Serving {{busy.first}} releases {{busy.curFirst}} back to their place in line.</div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" on-press="{{busy.go}}">Serve {{busy.first}}</x-import></div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{closeSheet}}">Keep serving</x-import></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{sh.claimed}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Already being served" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="display: flex; justify-content: center"><x-import component-from-global-scope="UntitledUI.FeaturedIcon" icon="{{ic.Users01}}" color="warning" theme="light" size="lg"></x-import></div>
+          <div style="text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)"><b style="font-weight: 600; color: var(--color-text-primary)">{{claim.by}} started serving {{claim.who}} first.</b><br>They moved to Serving. Nothing changed on your side.</div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{claim.noNext}}" on-press="{{claim.next}}">Serve next</x-import></div>
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{closeSheet}}">Back to queue</x-import></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <!-- ============ SPOTLIGHT: dims everything but the "You're serving" card while it pulses ============ -->
+  <sc-if value="{{f.spotlight}}" hint-placeholder-val="{{false}}">
+    <div class="spot-in" aria-hidden="true" onClick="{{endPulse}}" style="position: absolute; inset: 0; z-index: 60; background: rgba(10, 13, 18, 0.2)"></div>
+  </sc-if>
+
+  <!-- ============ PHOTO VIEWER ============ -->
+  <sc-if value="{{zoom.open}}" hint-placeholder-val="{{false}}">
+    <div role="dialog" aria-modal="true" aria-label="Photo of {{zoom.name}}" style="position: absolute; inset: 0; z-index: 72; display: flex; flex-direction: column; background: #0C0E12; color: #FFFFFF">
+      <header style="flex: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 91px; box-sizing: border-box; padding: 47px 16px 0">
+        <button type="button" class="nav-btn" aria-label="Close photo" onClick="{{zoom.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 9999px; background: rgba(255,255,255,0.14); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><x-import component-from-global-scope="UntitledUI.Icons.XClose" class="size-6" aria-hidden="true"></x-import></button>
+        <div style="flex: 1 1 auto; text-align: center; font-size: 17px; line-height: 24px; font-weight: 600">{{zoom.name}}</div>
+        <div style="width: 44px"></div>
+      </header>
+      <div style="flex: 1 1 auto; display: flex; align-items: center; justify-content: center; padding: 16px">
+        <img src="{{zoom.src}}" alt="Photo of {{zoom.name}}" style="width: 358px; height: 448px; object-fit: cover; border-radius: 12px">
+      </div>
+      <div style="flex: 0 0 auto; padding: 0 16px 50px; text-align: center; font-size: 15px; line-height: 22px; color: rgba(255,255,255,0.8)">Photo on file · Student ID {{zoom.sid}}</div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOAST ============ -->
+  <sc-if value="{{toast.show}}" hint-placeholder-val="{{false}}">
+    <!-- Dark toast, same as the web Pickup Queue: bg-primary-solid, white text, labelled Undo (44pt for touch). -->
+    <div role="{{toast.role}}" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: {{toast.bottom}}; z-index: 78; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 6px 4px 16px; box-sizing: border-box; border-radius: 12px; background: var(--color-bg-primary-solid); color: #FFFFFF; box-shadow: 0 20px 24px -4px rgba(10, 13, 18, 0.12), 0 8px 8px -4px rgba(10, 13, 18, 0.04)">
+      <span style="display: flex; flex: 0 0 auto; color: {{toast.iconFg}}">
+        <sc-if value="{{toast.isSuccess}}" hint-placeholder-val="{{true}}"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-5" aria-hidden="true"></x-import></sc-if>
+        <sc-if value="{{toast.isWarning}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.AlertTriangle" class="size-5" aria-hidden="true"></x-import></sc-if>
+        <sc-if value="{{toast.isInfo}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.InfoCircle" class="size-5" aria-hidden="true"></x-import></sc-if>
+      </span>
+      <span style="flex: 1 1 auto; min-width: 0; padding: 10px 0; font-size: 15px; line-height: 22px; font-weight: 600">{{toast.text}}</span>
+      <sc-if value="{{toast.hasUndo}}" hint-placeholder-val="{{false}}">
+        <button type="button" class="nav-btn toast-act" onClick="{{toast.undoPress}}" style="flex: 0 0 auto; height: 44px; min-width: 44px; padding: 0 12px; border-radius: 8px; border: 0; background: transparent; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">{{toast.actionLabel}}</button>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ iOS KEYBOARD (device chrome, drawn by hand) ============ -->
+  <sc-if value="{{kb.open}}" hint-placeholder-val="{{false}}">
+    <div class="kb-anim" role="group" aria-label="Keyboard" onMouseDown="{{kb.hold}}" style="position: absolute; left: 0; right: 0; bottom: 0; height: 336px; z-index: 76; box-sizing: border-box; padding: 6px 3px 0; display: flex; flex-direction: column; gap: 12px; background: #D1D4DA; font-family: -apple-system, Inter, sans-serif; color: #000000; user-select: none">
+      <div style="display: flex; height: 36px; margin: 0 -3px -2px; align-items: center">
+        <sc-for list="{{kb.sugs}}" as="s" hint-placeholder-count="3">
+          <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{s.pick}}" style="flex: 1 1 0; height: 36px; border: 0; border-left: {{s.rule}}; background: none; font: inherit; font-size: 16px; font-weight: {{s.weight}}; color: #000000; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{s.label}}</button>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 6px; justify-content: center">
+        <sc-for list="{{kb.r1}}" as="k" hint-placeholder-count="10">
+          <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{k.press}}" style="flex: 0 0 32px; height: 42px; border: 0; border-radius: 5px; background: #FFFFFF; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 22px; color: #000000; padding: 0; cursor: pointer">{{k.label}}</button>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 6px; justify-content: center">
+        <sc-for list="{{kb.r2}}" as="k" hint-placeholder-count="9">
+          <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{k.press}}" style="flex: 0 0 32px; height: 42px; border: 0; border-radius: 5px; background: #FFFFFF; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 22px; color: #000000; padding: 0; cursor: pointer">{{k.label}}</button>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 6px; justify-content: center; align-items: center">
+        <button type="button" class="kk" aria-label="{{kb.shiftLabel}}" onMouseDown="{{kb.hold}}" onClick="{{kb.shift}}" style="flex: 0 0 42px; height: 42px; margin-right: 8px; border: 0; border-radius: 5px; background: {{kb.shiftBg}}; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 17px; color: #000000; padding: 0; cursor: pointer">{{kb.shiftGlyph}}</button>
+        <sc-for list="{{kb.r3}}" as="k" hint-placeholder-count="7">
+          <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{k.press}}" style="flex: 0 0 32px; height: 42px; border: 0; border-radius: 5px; background: #FFFFFF; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 22px; color: #000000; padding: 0; cursor: pointer">{{k.label}}</button>
+        </sc-for>
+        <button type="button" class="kk" aria-label="Delete" onMouseDown="{{kb.hold}}" onClick="{{kb.del}}" style="flex: 0 0 42px; height: 42px; margin-left: 8px; border: 0; border-radius: 5px; background: #ABB0BA; box-shadow: 0 1px 0 #898A8D; color: #000000; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="23" height="17" viewBox="0 0 23 17" aria-hidden="true"><path d="M7.3 1h13.2A1.5 1.5 0 0 1 22 2.5v12a1.5 1.5 0 0 1-1.5 1.5H7.3L1 8.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path><path d="m11 5.5 6 6m0-6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>
+      </div>
+      <div style="display: flex; gap: 6px">
+        <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{kb.mode}}" style="flex: 0 0 88px; height: 42px; border: 0; border-radius: 5px; background: #ABB0BA; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 16px; color: #000000; cursor: pointer">{{kb.modeLabel}}</button>
+        <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{kb.space}}" style="flex: 1 1 auto; height: 42px; border: 0; border-radius: 5px; background: #FFFFFF; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 16px; color: #000000; cursor: pointer">space</button>
+        <button type="button" class="kk" onMouseDown="{{kb.hold}}" onClick="{{kb.ret}}" style="flex: 0 0 88px; height: 42px; border: 0; border-radius: 5px; background: {{kb.retBg}}; box-shadow: 0 1px 0 #898A8D; font: inherit; font-size: 16px; font-weight: 500; color: {{kb.retFg}}; cursor: pointer">{{kb.retLabel}}</button>
+      </div>
+      <div aria-hidden="true" style="display: flex; justify-content: space-between; padding: 4px 24px 0; color: #4B4F57">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"></circle><path d="M8 14.5c1 1.3 2.4 2 4 2s3-.7 4-2"></path><circle cx="9" cy="10" r="0.6" fill="currentColor"></circle><circle cx="15" cy="10" r="0.6" fill="currentColor"></circle></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M6 11a6 6 0 0 0 12 0M12 17v4"></path></svg>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ Prototype only: dev-tools controls, deliberately not the design system ============ -->
+  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 10px; bottom: 6px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
+  <sc-if value="{{proto.open}}" hint-placeholder-val="{{false}}">
+    <aside class="proto" aria-label="Prototype controls" style="position: absolute; left: 10px; bottom: 34px; z-index: 82; width: 250px; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
+      <div style="font-weight: 600">Prototype only</div>
+      <!-- Two plain tabs: Controls (conditions you layer on) and Checkpoints (jump to a moment in the flow). -->
+      <div role="tablist" aria-label="Prototype panel" style="display: flex; gap: 12px; border-bottom: 1px solid #3C3C3C; margin: 0 -10px 2px; padding: 0 10px">
+        <button type="button" role="tab" aria-selected="{{proto.tabC}}" onClick="{{proto.toControls}}" class="proto-tab {{proto.tabCCls}}" style="border: 0; background: none; font: inherit; padding: 4px 0; cursor: pointer">Controls</button>
+        <button type="button" role="tab" aria-selected="{{proto.tabK}}" onClick="{{proto.toCheckpoints}}" class="proto-tab {{proto.tabKCls}}" style="border: 0; background: none; font: inherit; padding: 4px 0; cursor: pointer">Checkpoints</button>
+        <button type="button" role="tab" aria-selected="{{proto.tabE}}" onClick="{{proto.toErrors}}" class="proto-tab {{proto.tabECls}}" style="border: 0; background: none; font: inherit; padding: 4px 0; cursor: pointer">Errors</button>
+      </div>
+      <sc-if value="{{proto.tabC}}" hint-placeholder-val="{{true}}">
+      <sc-if value="{{proto.camItems}}" hint-placeholder-val="{{false}}">
+        <span>Camera sees</span>
+        <button type="button" class="uu-btn" data-tip="Scans the next package on this student’s list." onClick="{{proto.seeNext}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">This student’s next package</button>
+        <button type="button" class="uu-btn" data-tip="Shows the alert for a package that belongs to another student." onClick="{{proto.seeWrong}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">Another student’s package</button>
+        <button type="button" class="uu-btn" data-tip="Shows the alert for a tracking number that isn’t in Delivery CTRL." onClick="{{proto.seeUnknown}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">Label not in the system</button>
+      </sc-if>
+      <sc-if value="{{proto.camId}}" hint-placeholder-val="{{false}}">
+        <span>Camera sees</span>
+        <button type="button" class="uu-btn" data-tip="Scans the ID of the student being served, as proof of handover." onClick="{{proto.seeId}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">This student’s ID</button>
+        <button type="button" class="uu-btn" data-tip="Scans an ID that isn’t this student’s." onClick="{{proto.seeOtherId}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">Another student’s ID</button>
+        <sc-if value="{{proto.hasPx}}" hint-placeholder-val="{{false}}"><button type="button" class="uu-btn" data-tip="Scans the ID of someone they’re picking up for." onClick="{{proto.seeRecipId}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.recipLabel}}</button></sc-if>
+      </sc-if>
+      <sc-if value="{{proto.camCheckin}}" hint-placeholder-val="{{false}}">
+        <span>Camera sees the ID of</span>
+        <button type="button" class="uu-btn" data-tip="A student with packages ready. Checks them in at the end of the line." onClick="{{proto.ciScanNew}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.ciNewLabel}}</button>
+        <button type="button" class="uu-btn" data-tip="Priya Raman is already in line (A107)." onClick="{{proto.ciScanIn}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">Already in line (Priya)</button>
+        <button type="button" class="uu-btn" data-tip="A student with no packages ready." onClick="{{proto.ciScanNone}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">No packages ready</button>
+      </sc-if>
+      <sc-if value="{{proto.camServe}}" hint-placeholder-val="{{false}}">
+        <span>Camera sees the ID of</span>
+        <button type="button" class="uu-btn" data-tip="Serves Priya Raman now, even though she isn’t next." onClick="{{proto.scanInLine}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">Someone in line (Priya, A107)</button>
+        <button type="button" class="uu-btn" data-tip="A student who isn’t in line but has packages ready." onClick="{{proto.scanNotIn}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.ciNewLabel}}</button>
+        <button type="button" class="uu-btn" data-tip="Omar Haddad is being served at Window 1." onClick="{{proto.scanOther}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">At another window (Omar, A103)</button>
+        <button type="button" class="uu-btn" data-tip="A student with no packages ready." onClick="{{proto.scanNone}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">No packages ready</button>
+      </sc-if>
+      <span style="margin-top: 4px">Queue</span>
+      <button type="button" class="uu-btn" data-tip="Adds a new student to the end of the line, as if they checked in on the app." onClick="{{proto.arrive}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">A student checks in on the app</button>
+      <button type="button" class="uu-btn" aria-pressed="{{proto.race}}" data-tip="Your next Serve loses the race: another operator claims that student first." onClick="{{proto.toggleRace}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.raceLabel}}</button>
+      <button type="button" class="uu-btn" data-tip="Empties the queue, or brings it back, to show the empty state." onClick="{{proto.toggleEmpty}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.emptyLabel}}</button>
+      <span style="margin-top: 4px">Wait times</span>
+      <sc-for list="{{proto.waits}}" as="w" hint-placeholder-count="3">
+        <button type="button" class="uu-btn" aria-pressed="{{w.on}}" data-tip="Ages wait times: 15+ min shows amber, 20+ min red." onClick="{{w.pick}}" style="border: 1px solid #555; background: {{w.bg}}; font: inherit; text-align: left; cursor: pointer">{{w.label}}</button>
+      </sc-for>
+      <span style="margin-top: 4px">Connection</span>
+      <button type="button" class="uu-btn" aria-pressed="{{f.offline}}" data-tip="Turns the connection off or on. Offline blocks serving new students." onClick="{{proto.toggleOffline}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.offlineLabel}}</button>
+      <span style="margin-top: 4px">Printer</span>
+      <button type="button" class="uu-btn" aria-pressed="{{proto.printerDown}}" data-tip="The printer stops responding, so receipts show the Try again toast." onClick="{{proto.togglePrinter}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.printerLabel}}</button>
+      <span style="margin-top: 4px">Site setting</span>
+      <button type="button" class="uu-btn" aria-pressed="{{proto.partial}}" data-tip="Turns partial pickup on or off for this mailroom." onClick="{{proto.togglePartial}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{proto.partialLabel}}</button>
+      <button type="button" class="uu-btn" data-tip="Clears everything and returns to the starting queue." onClick="{{proto.reset}}" style="margin-top: 6px; border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">Reset prototype</button>
+      </sc-if>
+      <sc-if value="{{proto.tabK}}" hint-placeholder-val="{{false}}">
+        <span>Jump to a moment · each starts from a reset</span>
+        <sc-for list="{{proto.cps}}" as="c" hint-placeholder-count="10">
+          <button type="button" class="uu-btn" data-tip="{{c.tip}}" onClick="{{c.go}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{c.label}}</button>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{proto.tabE}}" hint-placeholder-val="{{false}}">
+        <span>Jump to an error · each starts from a reset</span>
+        <sc-for list="{{proto.errs}}" as="c" hint-placeholder-count="8">
+          <button type="button" class="uu-btn" data-tip="{{c.tip}}" onClick="{{c.go}}" style="border: 1px solid #555; background: none; font: inherit; text-align: left; cursor: pointer">{{c.label}}</button>
+        </sc-for>
+      </sc-if>
+    </aside>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.initial();
+    this._strokes = [];
+  }
+  initial() {
+    const P = (id, carrier, trk, size, shelf, cell) => ({ id, carrier, trk, size, shelf, cell });
+    const S = (t, name, sid, mail, wait, via, pk, px) => ({ t, name, sid, mail, wait, via, pk, px });
+    // Proxy pickups (like the web): recipients authorized this person in the student app. Packages carry their owner.
+    const O = (owner, p) => Object.assign(p, { owner });
+    return {
+      view: 'home', inTab: 'pickup', qTab: 'queue', q: '', sort: 'oldest', protoTab: (this.state && this.state.protoTab) || 'controls',
+      queue: [
+        S('A105', 'Emily Chen', '2041-883', 'Mail code HH-114', 14, 'Student app', [P('e1', 'UPS', '1Z4F892X0348217730', 'Medium box', 'C', 'C4'), P('e2', 'USPS', '9400111899223344556677', 'Large envelope', 'C', 'C1'), P('e3', 'Amazon', 'TBA318825590134', 'Small box', 'C', 'C8')]),
+        S('A106', 'Marcus Lee', '2039-117', 'Mail code MH-203', 11, 'Kiosk', [P('m1', 'FedEx', '773912440018', 'Small box', 'B', 'B7')]),
+        S('A107', 'Priya Raman', '2042-450', 'Mail code HH-021', 9, 'Student app', [P('p1', 'UPS', '1Z9A01X20377650012', 'Medium box', 'A', 'A4'), P('p2', 'USPS', '9405511899561234098712', 'Padded mailer', 'A', 'A13'), O('Rachel Goldberg', P('p3', 'Amazon', 'TBA318825511187', 'Small box', 'A', 'A6'))], { self: true, for: [{ name: 'Rachel Goldberg', sid: '2040-187' }] }),
+        S('A108', 'Jordan Mitchell', '2040-662', 'Mail code MH-310', 6, 'Kiosk', [P('j1', 'Amazon', 'TBA318826601245', 'Large box', 'Floor', 'Oversize 2'), P('j2', 'UPS', '1Z4F892X0399018841', 'Small box', 'A', 'A2'), P('j3', 'FedEx', '773912558830', 'Medium box', 'A', 'A19'), P('j4', 'USPS', '9400111899229876543210', 'Large envelope', 'A', 'A21')]),
+        S('A109', 'Alex Park', '2043-008', 'Mail code HH-317', 4, 'Kiosk', [O('Kevin O’Brien', P('a1', 'USPS', '9400111899227418529630', 'Large envelope', 'B', 'B9')), O('Kevin O’Brien', P('a2', 'Amazon', 'TBA318827418529', 'Medium box', 'B', 'B9')), O('Mei Lin', P('a3', 'Amazon', 'TBA318818529630', 'Medium box', 'B', 'B15'))], { self: false, for: [{ name: 'Kevin O’Brien', sid: '2045-007' }, { name: 'Mei Lin', sid: '2039-553' }] }),
+        S('A110', 'Sofia Alvarez', '2041-219', 'Mail code MH-114', 2, 'Student app', [P('s1', 'Amazon', 'TBA318827700332', 'Medium box', 'B', 'B14'), P('s2', 'USPS', '9405511899561122334455', 'Padded mailer', 'C', 'C2')]),
+        // Guest (not in the system): typed first and last name at the kiosk. Their packages are sorted out at the window.
+        Object.assign(S('A111', 'Dana Reyes', null, null, 1, 'Kiosk', []), { guest: true })
+      ],
+      // Students a guest can name at the window. auth = guests the student added as pickup people in the app.
+      guestPool: [
+        { name: 'Nina Patel', sid: '2042-615', pr: 'her', auth: ['Dana Reyes'], pk: [P('n1', 'UPS', '1Z4F892X0366120045', 'Medium box', 'C', 'C9'), P('n2', 'USPS', '9405511899560044557788', 'Padded mailer', 'A', 'A11')] },
+        { name: 'Theo Grant', sid: '2040-208', pr: 'his', auth: ['Dana Reyes'], pk: [P('tg1', 'Amazon', 'TBA318829904410', 'Small box', 'B', 'B6')] },
+        { name: 'Nina Brooks', sid: '2043-377', pr: 'her', auth: [], pk: [P('nb1', 'FedEx', '773912884402', 'Large box', 'Floor', 'Oversize 1')] },
+        { name: 'Nick Alvarez', sid: '2041-090', pr: 'his', auth: [], pk: [P('na1', 'UPS', '1Z4F892X0312347788', 'Small box', 'A', 'A3')] },
+        { name: 'Nico Russo', sid: '2042-731', pr: 'his', auth: [], pk: [P('nr1', 'USPS', '9400111899221199887766', 'Large envelope', 'C', 'C3')] },
+        { name: 'Mei Tanaka', sid: '2041-904', pr: 'her', auth: [], pk: [P('mt1', 'USPS', '9400111899225566778899', 'Large envelope', 'C', 'C5')] }
+      ],
+      others: [
+        { t: 'A103', name: 'Omar Haddad', by: 'Maria L. · Window 1', min: 3, sid: '2042-331', mail: 'Mail code HH-410', pk: [P('o1', 'UPS', '1Z4F892X0377889900', 'Medium box', 'B', 'B2'), P('o2', 'USPS', '9400111899221212121212', 'Padded mailer', 'B', 'B4')] },
+        { t: 'A104', name: 'Grace Kim', by: 'Dana K. · Window 3', min: 1 }
+      ],
+      done: [
+        { t: 'A102', name: 'Leah Gomez', n: 2, total: 2, by: 'Maria L. · Window 1', at: '11:05 AM', proof: 'Proof: student ID scan', mine: false, sid: '2042-118', mail: 'Mail code HH-302', pk: [P('g1', 'UPS', '1Z4F892X0301010101', 'Small box', 'A', 'A8'), P('g2', 'USPS', '9400111899220202020202', 'Padded mailer', 'A', 'A9')] },
+        { t: 'A101', name: 'Tyler Brooks', px: { self: true, for: [{ name: 'Nora Quinn', sid: '2038-336' }] }, n: 1, total: 1, by: 'Dana K. · Window 3', at: '10:52 AM', proof: 'Proof: signature', mine: false, sid: '2040-947', mail: 'Mail code MH-118', pk: [P('t1', 'FedEx', '773912770011', 'Medium box', 'B', 'B5')] },
+        { t: 'A100', name: 'Hannah Liu', n: 3, total: 3, by: 'You', at: '10:41 AM', proof: 'Proof: signature', mine: true, sid: '2043-221', mail: 'Mail code HH-009', pk: [P('h1', 'UPS', '1Z4F892X0303030303', 'Small box', 'C', 'C5'), P('h2', 'Amazon', 'TBA318829900551', 'Medium box', 'C', 'C6'), P('h3', 'USPS', '9400111899220303030303', 'Large envelope', 'C', 'C7')] },
+        { t: 'A099', name: 'Isaac Moore', n: 1, total: 1, by: 'You', at: '10:30 AM', proof: 'Proof: student ID scan', mine: true, sid: '2041-776', mail: 'Mail code MH-305', pk: [P('i1', 'UPS', '1Z4F892X0304040404', 'Small box', 'B', 'B1')] }
+      ],
+      ready: [
+        { name: 'Diego Ramos', sid: '2040-331', mail: 'Mail code HH-205', pk: [P('d1', 'UPS', '1Z4F892X0355667788', 'Small box', 'B', 'B3')] },
+        { name: 'Zoe Carter', sid: '2042-774', mail: 'Mail code MH-401', pk: [P('z1', 'USPS', '9400111899220011223344', 'Padded mailer', 'A', 'A6'), P('z2', 'FedEx', '773912669941', 'Medium box', 'B', 'B9')] },
+        { name: 'Lucas Bennett', sid: '2039-905', mail: 'Mail code HH-118', pk: [P('l1', 'Amazon', 'TBA318828811443', 'Large box', 'Floor', 'Oversize 4')] },
+        { name: 'Fatima Noor', sid: '2041-560', mail: 'Mail code MH-222', pk: [P('f1', 'UPS', '1Z9A01X20388761123', 'Small box', 'C', 'C3')] },
+        { name: 'Priya Shah', sid: '2043-118', mail: 'Mail code HH-310', pk: [P('ps1', 'USPS', '9400111899220099887766', 'Padded mailer', 'A', 'A9')] }
+      ],
+      nextNum: 112, gq: '', baseServed: 34,
+      mine: null, screen: null, camMode: null, camAlert: null, camFlash: null,
+      sheet: null, claim: null, busy: null, ciQ: '', skipNote: '', relOk: false, typeQ: '', typeBad: false,
+      sigD: '', toast: null, offline: false, partial: true, race: false, emptied: null,
+      kb: null, kbShift: false, kbNum: false, zoom: null, camOpen: false, typeFor: null, printer: 'Back office', printerDown: false,
+      annUntil: 0, protoOpen: false, picking: false, justDone: 0, moveFor: null, moveTo: null, waitMode: null, now: Date.now()
+    };
+  }
+  componentDidMount() { this._tick = setInterval(() => this.setState({ now: Date.now() }), 10000); }
+  // Auto-anchor: when a step finishes, scroll the Serve screen to what's next.
+  componentDidUpdate() {
+    const m = this.state.mine;
+    if (!m || this.state.screen !== 'serve') return;
+    if (this._anchorFor !== m.startedAt) { this._anchorFor = m.startedAt; this._didAll = m.scanned.length === m.s.pk.length; this._didProof = !!(m.idAt || m.sig); }
+    const all = m.s.pk.length > 0 && m.scanned.length === m.s.pk.length;
+    const proof = !!(m.idAt || m.sig);
+    const main = this._serveMain;
+    if (!main) return;
+    const go = (top) => setTimeout(() => { try { main.scrollTo({ top, behavior: 'smooth' }); } catch (e) { main.scrollTop = top; } }, 120);
+    if (proof && !this._didProof) { this._didProof = true; this._didAll = this._didAll || all; go(main.scrollHeight); return; }
+    if (all && !this._didAll) {
+      this._didAll = true;
+      const el = this._step2;
+      if (el) { const mr = main.getBoundingClientRect(), er = el.getBoundingClientRect(); const k = main.clientHeight / (mr.height || 1); go(main.scrollTop + (er.top - mr.top) * k - 16); }
+    }
+  }
+  componentWillUnmount() { clearInterval(this._tick); clearTimeout(this._toastT); clearTimeout(this._flashT); clearTimeout(this._annT); clearTimeout(this._blurT); }
+
+  // ---------- helpers ----------
+  clock() { return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
+  ini(n) { return n.split(' ').map((w) => w[0]).slice(0, 2).join(''); }
+  pkCount(n) { return n + (n === 1 ? ' package' : ' packages'); }
+  // Proxy helpers
+  andList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0] || ''; }
+  shortName(n) { const q = n.split(' '); return q[0] + (q[1] ? ' ' + q[1][0] + '.' : ''); }
+  pxHeader(s) { return s.px ? (s.px.self ? 'Also picking up for ' : 'Picking up for ') + this.andList(s.px.for.map((r) => r.name)) : ''; }
+  pxShort(s) { return s.px ? (s.px.self ? 'Also for ' : 'For ') + s.px.for.map((r) => this.shortName(r.name)).join(', ') : ''; }
+  // Shelf order; for a proxy pickup, grouped by owner first (their own, then each recipient).
+  pkSorted(s, list) {
+    const byShelf = (a, b) => (a.shelf + a.cell).localeCompare(b.shelf + b.cell, undefined, { numeric: true });
+    if (!s.px) return list.slice().sort(byShelf);
+    const order = [s.name].concat(s.px.for.map((r) => r.name));
+    return list.slice().sort((a, b) => (order.indexOf(a.owner || s.name) - order.indexOf(b.owner || s.name)) || byShelf(a, b));
+  }
+  // Group label fields for row i of an owner-sorted list.
+  pkGroup(s, arr, i, all) {
+    if (!s.px) return { grpOn: false, grpLabel: '' };
+    const own = arr[i].owner || s.name;
+    if (i > 0 && (arr[i - 1].owner || s.name) === own) return { grpOn: false, grpLabel: '' };
+    const n = (all || arr).filter((p) => (p.owner || s.name) === own).length;
+    return { grpOn: true, grpLabel: own === s.name ? s.name + ' (their own) · ' + n : 'For ' + own + ' · ' + n };
+  }
+  shelves(pk) { const s = []; pk.forEach((p) => { const l = p.shelf === 'Floor' ? 'Floor' : 'Shelf ' + p.shelf; if (s.indexOf(l) < 0) s.push(l); }); return s.join(', '); }
+  toast(text, variant, undo, label) {
+    clearTimeout(this._toastT);
+    this.setState({ toast: { text, variant: variant || 'success', undo: undo || null, label: label || 'Undo' } });
+    this._toastT = setTimeout(() => this.setState({ toast: null }), undo ? 6000 : 2600);
+  }
+  dead() { this.toast('Not part of this prototype', 'neutral'); }
+  // Prototype only: Simulate › Wait times (same as the web). Ages waits so screens show 15+ (amber) and 20+ (red).
+  simWaits(mode) {
+    const q = this.state.queue.map((x) => Object.assign({}, x, { wait0: x.wait0 == null ? x.wait : x.wait0 }));
+    const n = q.length, half = Math.ceil(n / 2);
+    q.sort((a, b) => b.wait0 - a.wait0).forEach((x, i) => {
+      if (mode === 'normal') x.wait = x.wait0;
+      else if (mode === 'mixed') x.wait = i < 2 ? 22 - i : i < 4 ? 17 - (i - 2) : x.wait0;
+      else x.wait = i < half ? 26 - i * 2 : 19 - (i - half);
+    });
+    this.setState({ queue: q, waitMode: mode, protoOpen: false });
+  }
+  sortedQueue() { const q = this.state.queue.slice().sort((a, b) => b.wait - a.wait); return this.state.sort === 'newest' ? q.reverse() : q; }
+  oldest() { return this.state.queue.slice().sort((a, b) => b.wait - a.wait)[0] || null; }
+  blurActive() { try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (e) {} }
+
+  // ---------- keyboard ----------
+  kbOpen(t) { clearTimeout(this._blurT); if (!this.state.kb || this.state.kb !== t) this.setState({ kb: t, kbShift: t !== 'search', kbNum: false }); }
+  kbBlur() { clearTimeout(this._blurT); this._blurT = setTimeout(() => this.setState({ kb: null }), 60); }
+  kbGet(t) { const s = this.state; return t === 'search' ? s.q : t === 'ci' ? s.ciQ : t === 'gq' ? s.gq : t === 'type' ? s.typeQ : t === 'note' ? s.skipNote : ''; }
+  kbSet(t, v) {
+    if (t === 'search') this.setState({ q: v });
+    else if (t === 'ci') this.setState({ ciQ: v });
+    else if (t === 'gq') this.setState({ gq: v });
+    else if (t === 'type') this.setState({ typeQ: v, typeBad: false });
+    else if (t === 'note') this.setState({ skipNote: v });
+  }
+  kbType(ch) {
+    const t = this.state.kb; if (!t) return;
+    const c = this.state.kbShift ? ch.toUpperCase() : ch;
+    this.kbSet(t, this.kbGet(t) + c);
+    if (this.state.kbShift) this.setState({ kbShift: false });
+  }
+  kbClose() { this.blurActive(); clearTimeout(this._blurT); this.setState({ kb: null }); }
+
+  // ---------- serve ----------
+  serve(s) {
+    const st = this.state;
+    if (st.offline) { this.toast('You’re offline. Reconnect to serve.', 'warning'); return; }
+    if (st.mine) { clearTimeout(this._pulseT); try { this._queueMain && this._queueMain.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} this.setState({ pulseOn: true }); this._pulseT = setTimeout(() => this.setState({ pulseOn: false }), 3000); this.toast('Finish or release ' + st.mine.s.t + ' first', 'warning'); return; }
+    this.kbClose();
+    const queue = st.queue.filter((x) => x.t !== s.t);
+    if (st.race) {
+      this.setState({ queue, others: st.others.concat([{ t: s.t, name: s.name, by: 'Maria L. · Window 1', min: 0 }]), race: false, sheet: 'claimed', claim: { by: 'Maria L. at Window 1', who: s.t + ' · ' + s.name } });
+      return;
+    }
+    this._strokes = [];
+    this.setState({ queue, q: '', mine: { s, s0: s, startedAt: Date.now(), idAt: null, scanned: [], sig: null }, screen: 'serve', sigD: '', annUntil: 0 });
+  }
+  // ---------- scan a student ID from the queue (same rules as the web window scanner) ----------
+  scanServe(kind) {
+    const st = this.state;
+    const close = { screen: st.mine ? 'serve' : null, camMode: null, camAlert: null, camFlash: null, protoOpen: false };
+    if (st.offline) { this.setState(Object.assign({}, close, { screen: null })); this.toast('You’re offline. Reconnect to serve.', 'warning'); return; }
+    let p = null;
+    if (kind === 'line') {
+      const s = st.queue.find((x) => x.name === 'Priya Raman') || st.queue.slice().sort((a, b) => b.wait - a.wait)[1] || st.queue[0];
+      if (s) p = { kind, s };
+    } else if (kind === 'new') {
+      const r = st.ready[0];
+      if (r) p = { kind, s: Object.assign({ t: 'A' + st.nextNum, wait: 0, via: 'ID scan' }, r), ready: r };
+    } else if (kind === 'other') {
+      const o = st.others[0];
+      if (o) p = { kind, s: { t: o.t, name: o.name, sid: o.sid || '2040-000', mail: o.mail || 'Mail code —', wait: o.min, via: 'Kiosk', pk: o.pk || [] }, other: o };
+    }
+    if (!p) {
+      this.setState(Object.assign({}, close, { screen: st.mine ? 'serve' : null }));
+      this.toast(kind === 'none' ? 'No packages ready for Ben Ortiz' : 'No student found for that ID', 'warning');
+      return;
+    }
+    // One student at a time: Scan ID doesn't open while serving (it pulses like Serve); this is a safety net.
+    if (st.mine) { this.setState(Object.assign({}, close, { screen: null })); this.serve(); return; }
+    this.setState(close);
+    this.startScanned(p);
+  }
+  startScanned(p) {
+    const st = this.state;
+    const oldest = this.oldest();
+    // Shared rules: a student ID scan at the window only starts the pickup. It isn't proof.
+    const patch = { mine: { s: p.s, startedAt: Date.now(), idAt: null, idTyped: false, scanned: [], sig: null }, screen: 'serve', sheet: null, busy: null, sigD: '', annUntil: 0, q: '' };
+    patch.queue = st.queue.filter((x) => x.t !== p.s.t);
+    if (p.kind === 'new') { patch.ready = st.ready.filter((x) => x !== p.ready); patch.nextNum = st.nextNum + 1; }
+    if (p.kind === 'other') patch.others = st.others.filter((x) => x !== p.other);
+    this._strokes = [];
+    this.setState(patch);
+    if (p.kind === 'new') this.toast(p.s.t + ' · ' + p.s.name + ' checked in and served', 'neutral');
+    else if (p.kind === 'other') this.toast(p.s.t + ' moved to you from Maria L.', 'neutral');
+    else if (oldest && oldest.t !== p.s.t) this.toast('Serving ' + p.s.t + ' out of turn', 'neutral');
+  }
+  scanCheckIn(kind) {
+    const st = this.state;
+    const back = { screen: st.mine && st.returnScreen === 'serve' ? 'serve' : null, camMode: null, camAlert: null, camFlash: null, protoOpen: false };
+    if (kind === 'new') {
+      const r = st.ready[0];
+      if (!r) { this.setState(Object.assign({}, back, { sheet: 'checkin' })); this.toast('No packages ready for that student', 'warning'); return; }
+      const t = 'A' + st.nextNum;
+      this.setState(Object.assign({}, back, { sheet: null, ciQ: '', ready: st.ready.filter((x) => x !== r), queue: st.queue.concat([Object.assign({ t, wait: 0, via: 'Checked in by you' }, r)]), nextNum: st.nextNum + 1, qTab: 'queue' }));
+      this.toast(t + ' · ' + r.name + ' checked in');
+      return;
+    }
+    if (kind === 'in') {
+      const s = st.queue.find((x) => x.name === 'Priya Raman') || st.queue[0];
+      this.setState(Object.assign({}, back, { sheet: 'checkin' }));
+      this.toast(s ? s.name + ' is already in line as ' + s.t : 'Already in line', 'neutral');
+      return;
+    }
+    this.setState(Object.assign({}, back, { sheet: 'checkin' }));
+    this.toast('No packages ready for Ben Ortiz', 'warning');
+  }
+  sendReceipt(name, rec) {
+    if (this.state.printerDown) { this.setState({ sheet: null, printer: name, printJob: null }); this.toast(name + ' printer isn’t responding', 'warning', () => this.sendReceipt(name, rec), 'Try again'); return; }
+    this.setState({ sheet: null, printer: name, printJob: null });
+    this.toast('Receipt for ' + rec.t + ' sent to ' + name + ' printer', 'success');
+  }
+  sendPickList(name) {
+    const st = this.state, m = st.mine;
+    if (!m) return;
+    if (st.printerDown) { this.setState({ sheet: null, printer: name }); this.toast(name + ' printer isn’t responding', 'warning', () => this.sendPickList(name), 'Try again'); return; }
+    this.setState({ sheet: null, printer: name, mine: Object.assign({}, m, { printedAt: this.clock(), printedTo: name }) });
+    this.toast('Pick list sent to ' + name + ' printer', 'success');
+  }
+  // Shared rules (Reset): if checked items change after identity was confirmed, the confirmation clears.
+  // ---------- guests (shared rules: only students who added the guest can be added; several allowed) ----------
+  guestAdd(p) {
+    const m = this.state.mine; if (!m || !m.s.guest) return;
+    const pfor = m.s.px ? m.s.px.for : [];
+    if (pfor.some((r) => r.sid === p.sid)) return;
+    const pk = m.s.pk.concat(p.pk.map((x) => Object.assign({}, x, { owner: p.name })));
+    const s = Object.assign({}, m.s, { pk, px: { self: false, for: pfor.concat([{ name: p.name, sid: p.sid }]) } });
+    this.kbClose();
+    this.setState({ mine: Object.assign({}, m, { s }), sheet: null, gq: '' });
+    this.toast(p.name + ' added · ' + this.pkCount(p.pk.length));
+  }
+  guestRemove(name) {
+    const m = this.state.mine; if (!m || !m.s.px) return;
+    const rest = m.s.px.for.filter((r) => r.name !== name);
+    const s = Object.assign({}, m.s, { pk: m.s.pk.filter((x) => x.owner !== name), px: rest.length ? { self: false, for: rest } : undefined });
+    // Like the web: removing a student changes the item list, so item checks and any proof start over.
+    this.setState({ mine: Object.assign({}, m, { s, scanned: [], idAt: null, idTyped: false, sig: null }) });
+    this.toast(name + ' removed. Item checks start over.', 'neutral');
+  }
+  guestOut() {
+    const m = this.state.mine; if (!m) return;
+    this.setState({ mine: null, screen: null, sheet: null, gq: '' });
+    this.toast(m.s.name + ' removed from the queue', 'neutral');
+  }
+  rescan(mm, scanned) {
+    const had = !!(mm.idAt || mm.sig);
+    return { had, mine: Object.assign({}, mm, { scanned }, had ? { idAt: null, idTyped: false, sig: null } : {}) };
+  }
+  scanItem(p) {
+    const m = this.state.mine;
+    if (m.scanned.indexOf(p.id) >= 0) { this.setState({ camAlert: null, camFlash: 'Already scanned' }); return; }
+    const scanned = m.scanned.concat([p.id]);
+    const all = scanned.length === m.s.pk.length;
+    clearTimeout(this._flashT);
+    const rs = this.rescan(m, scanned);
+    if (rs.had) setTimeout(() => this.toast('Packages changed. Confirm it’s them again.', 'info'), 0);
+    this.setState(Object.assign({ mine: rs.mine, camAlert: null, camFlash: all ? 'All ' + this.pkCount(scanned.length) + ' scanned' : p.cell + ' scanned · ' + scanned.length + ' of ' + m.s.pk.length }, all ? { camOpen: false } : {}));
+    this._flashT = setTimeout(() => this.setState({ camFlash: null }), all ? 3500 : 2200);
+  }
+  // Completion moment: ~0.8 s success beat on Serve, then the queue reacts (count ticks, next slides in).
+  // Prototype only: Simulate › Checkpoints. Each one starts from a clean reset, then sets up that moment in the flow.
+  jump(k) {
+    this._strokes = []; clearTimeout(this._toastT); clearTimeout(this._pickT); clearTimeout(this._doneT); this.blurActive && this.blurActive(); this.kbClose && this.kbClose();
+    const base = Object.assign(this.initial(), { now: Date.now(), protoOpen: false, protoTab: k.indexOf('e_') === 0 ? 'errors' : 'checkpoints', view: 'inbound', inTab: 'pickup', qTab: 'queue' });
+    const take = (t) => base.queue.find((x) => x.t === t);
+    const serving = (t, extra) => { const s = take(t); return Object.assign(base, { queue: base.queue.filter((x) => x.t !== t), screen: 'serve', mine: Object.assign({ s, s0: s, startedAt: Date.now() - 95000, idAt: null, scanned: [], sig: null }, extra || {}) }); };
+    const all = (t) => take(t).pk.map((p) => p.id);
+    let st = base, after = null;
+    if (k === 'serve') st = serving('A105');
+    else if (k === 'scan') { st = serving('A105', { scanned: [take('A105').pk[0].id] }); st.screen = 'cam'; st.camMode = 'items'; }
+    else if (k === 'confirm') st = serving('A105', { scanned: all('A105') });
+    else if (k === 'sign') { st = serving('A105', { scanned: all('A105') }); st.screen = 'sign'; }
+    else if (k === 'ready') st = serving('A105', { scanned: all('A105'), idAt: this.clock() });
+    else if (k === 'done') { st = serving('A105', { scanned: all('A105'), idAt: this.clock() }); after = () => this.complete(); }
+    else if (k === 'proxy') st = serving('A109');
+    else if (k === 'guest') st = serving('A111');
+    else if (k === 'e_guest') { st = serving('A111'); Object.assign(st, { sheet: 'guest', gq: 'Mei' }); }
+    else if (k === 'release') { st = serving('A105', { scanned: take('A105').pk.slice(0, 2).map((p) => p.id) }); st.sheet = 'release'; st.relOk = false; }
+    else if (k === 'move') Object.assign(st, { moveFor: 'up', moveTo: null });
+    else if (k === 'checkin') Object.assign(st, { sheet: 'checkin', ciQ: '' });
+    // Errors: set up the step, then let the product's own handling show the error.
+    else if (k === 'e_offline') st.offline = true;
+    else if (k === 'e_noid') Object.assign(st, { sheet: 'type', typeFor: '__idServe', typeQ: '2040-999', typeBad: 'No student with that ID is checked in or has packages ready.', kb: 'type', kbShift: false, kbNum: true });
+    else if (k === 'e_busy') { st = serving('A105'); st.screen = null; after = () => this.serve(); }
+    else if (k === 'e_wrong' || k === 'e_unknown') {
+      st = serving('A105', { scanned: [take('A105').pk[0].id] }); st.screen = 'cam'; st.camMode = 'items';
+      st.camAlert = k === 'e_wrong' ? { title: 'This package isn’t for ' + st.mine.s.name + '.', text: 'It belongs to Marcus Lee · Shelf B · B7. Put it back.' } : { title: 'Label not found.', text: 'This tracking number isn’t in Delivery CTRL. Check the label or set it aside for research.' };
+    }
+    else if (k === 'e_dup') { st = serving('A105', { scanned: [take('A105').pk[0].id] }); st.screen = 'cam'; st.camMode = 'items'; after = () => this.scanItem(this.state.mine.s.pk[0]); }
+    else if (k === 'e_inline') Object.assign(st, { sheet: 'checkin', ciQ: 'Priya' });
+    this.setState(st, after || undefined);
+  }
+  complete() {
+    if (this.state.picking) return;
+    this.setState({ picking: true });
+    clearTimeout(this._pickT); clearTimeout(this._doneT);
+    this._pickT = setTimeout(() => this.finishComplete(), 800);
+  }
+  finishComplete() {
+    const st = this.state, m = st.mine;
+    if (!m) { this.setState({ picking: false }); return; }
+    const proof = m.idAt ? (m.idTyped ? 'Proof: typed student ID · ' : 'Proof: student ID scan · ') + m.idAt : (m.sig && m.sig.skipped ? 'Signature skipped: “' + m.sig.note + '”' : 'Proof: signature');
+    const rec = { t: m.s.t, name: m.s.name, px: m.s.px, n: m.scanned.length, total: m.s.pk.length, by: 'You', at: this.clock(), proof, mine: true, pending: st.offline, student: m.s0 || m.s };
+    this.setState({ done: [rec].concat(st.done), mine: null, screen: null, qTab: 'queue', picking: false, justDone: Date.now() });
+    this._doneT = setTimeout(() => this.setState({ justDone: 0 }), 1700);
+    const rest = m.s.pk.length - m.scanned.length;
+    this.toast(m.s.t + ' picked up' + (rest ? ' · ' + rest + ' left ready' : ''), 'success', () => this.undo(rec));
+  }
+  undo(rec) {
+    const st = this.state;
+    const back = rec.student || { t: rec.t, name: rec.name, sid: rec.sid, mail: rec.mail, wait: 0, via: 'Kiosk', pk: rec.pk };
+    this.setState({ done: st.done.filter((d) => d !== rec), queue: st.queue.concat([back]) });
+    this.toast(rec.t + ' is back in line', 'neutral');
+  }
+  release() {
+    const st = this.state, m = st.mine;
+    this.setState({ queue: st.queue.concat([m.s0 || m.s]), mine: null, screen: null, sheet: null, relOk: false });
+    this.toast(m.s.t + ' is back in line at their place', 'neutral');
+  }
+
+  // ---------- signature ----------
+  pt(e) {
+    const r = e.currentTarget.getBoundingClientRect();
+    return [Math.round(((e.clientX - r.left) / r.width) * 326), Math.round(((e.clientY - r.top) / r.height) * 200)];
+  }
+  dString() { return this._strokes.map((s) => s.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + p[1]).join(' ')).join(' '); }
+
+  renderVals() {
+    const U = window.UntitledUI || {};
+    const ic = U.Icons || {};
+    const st = this.state;
+    const now = st.now || Date.now();
+    const DIV = 'rgba(10, 13, 18, 0.06)';
+    const rule = (i) => (i ? DIV : 'transparent');
+    // Same thresholds as the web: 15+ min amber, 20+ min red.
+    const waitColor = (w) => (w >= 20 ? 'error' : w >= 15 ? 'warning' : 'gray');
+    const waitFg = (w) => (w >= 20 ? 'var(--color-text-error-primary)' : w >= 15 ? 'var(--color-yellow-700)' : 'var(--color-text-tertiary)');
+    const mins = (m) => Math.max(0, m) + ' min';
+    // Prototype sample photos (same images as the web Pickup Queue canvas). Students not listed have no photo on file.
+    const PH = {
+      'Emily Chen': 'assets/1500fd05e884843bd0102de99436dea8.jpg', 'Marcus Lee': 'assets/4e0c63dbd4ded1921bd0a2640ee2060a.jpg',
+      'Priya Raman': 'assets/12148bfe55506efdace5130fb59e9eb0.jpg', 'Alex Park': 'assets/82836b39ef93d2414123087ea62892c9.jpg',
+      'Sofia Alvarez': 'assets/2d62996dc578b051327aa5a833841e62.jpg', 'Leah Gomez': 'assets/96cd786436278548a16820b1ec5dc1bd.jpg',
+      'Hannah Liu': 'assets/a83ce914e7c0d5c3435b9f38441e44c9.jpg', 'Zoe Carter': 'assets/f3f3ce3b87098fd95d5ef5a1509a6be7.jpg',
+      'Fatima Noor': 'assets/4736aa13b38580795cff9fab86b66b4f.jpg'
+    };
+    const photo = (n) => PH[n] || undefined;
+    const zoomOf = (n, sid) => () => { if (PH[n]) this.setState({ zoom: { src: PH[n], name: n, sid } }); };
+    const m = st.mine;
+    const isCam = st.screen === 'cam';
+    const isSign = st.screen === 'sign';
+    const isServe = !!m && (st.screen === 'serve' || isCam || isSign);
+    const kbOpen = !!st.kb;
+    const searchFocus = st.kb === 'search';
+
+    // ---- metrics
+    const oldest = this.oldest();
+    const metrics = {
+      inQueue: st.queue.length,
+      longest: oldest ? oldest.wait + ' min' : '—',
+      longestLine: oldest ? 'Longest wait ' + oldest.wait + ' min' : 'No one is waiting',
+      served: st.baseServed + st.done.length,
+      tickCls: st.justDone ? 'tick' : '', byMeCls: st.justDone ? 'byme-flash' : '', upCls: st.justDone ? 'up-slide' : '',
+      byMe: st.done.filter((d) => d.mine).length,
+      hasByMe: st.done.some((d) => d.mine)
+    };
+
+    // ---- queue list
+    const q = st.q.trim().toLowerCase();
+    const sorted = this.sortedQueue();
+    const hit = (x) => !q || [x.name, x.t, x.sid].concat(x.px ? x.px.for.map((r) => r.name + ' ' + r.sid) : []).join(' ').toLowerCase().indexOf(q) >= 0;
+    const upNext = !q && !searchFocus && oldest && !m ? oldest : null;
+    const rowsSrc = q ? sorted.filter(hit) : sorted.filter((x) => !upNext || x.t !== upNext.t);
+    const rows = rowsSrc.map((x, i) => ({
+      t: x.t, name: x.name, ini: this.ini(x.name), photo: photo(x.name), rule: rule(i), wait: x.wait + ' min', waitFg: x.wait >= 20 ? 'var(--color-text-error-primary)' : x.wait >= 15 ? 'var(--color-yellow-700)' : 'var(--color-text-secondary)',
+      pkShort: x.guest ? 'Packages sorted out at the window' : this.pkCount(x.pk.length) + ' · ' + this.shelves(x.pk), guest: !!x.guest,
+      serve: () => this.serve(x)
+    }));
+    const list = {
+      rows, has: rows.length > 0,
+      heading: q ? rows.length + (rows.length === 1 ? ' match in the line' : ' matches in the line') : (upNext ? rows.length + ' more waiting' : rows.length + ' checked in'),
+      emptyQueue: !q && st.queue.length === 0,
+      noMatch: !!q && rows.length === 0
+    };
+    const up = upNext ? { t: upNext.t, name: upNext.name, ini: this.ini(upNext.name), photo: photo(upNext.name), hasPhoto: !!photo(upNext.name), noPhoto: !photo(upNext.name), zoom: zoomOf(upNext.name, upNext.sid), wait: upNext.wait + ' min', waitColor: waitColor(upNext.wait), waitFg: waitFg(upNext.wait), guest: !!upNext.guest, pkLine: upNext.guest ? 'Packages sorted out at the window' : this.pkCount(upNext.pk.length) + ' · ' + this.shelves(upNext.pk) } : {};
+
+    // ---- serving
+    const servRows = [];
+    if (m) servRows.push({ t: m.s.t, name: m.s.name, ini: this.ini(m.s.name), photo: photo(m.s.name), by: 'You · this phone', timer: mins(Math.floor((now - m.startedAt) / 60000)), mine: true });
+    st.others.forEach((o) => servRows.push({ t: o.t, name: o.name, ini: this.ini(o.name), photo: photo(o.name), by: o.by, timer: mins(o.min), mine: false }));
+    const servF = servRows.filter(hit).map((r, i) => Object.assign(r, { rule: rule(i) }));
+    const serving = { rows: servF, has: servF.length > 0, none: servF.length === 0, noneText: q ? 'No one being served matches “' + st.q + '”' : 'No one is being served right now.' };
+
+    // ---- done
+    const doneF = st.done.filter(hit).map((c, i) => ({
+      t: c.t, name: c.name, ini: this.ini(c.name), photo: photo(c.name), rule: rule(i), proof: c.proof, pending: !!c.pending, hasPx: !!c.px, pxText: this.pxShort(c),
+      line: (c.n < c.total ? c.n + ' of ' + c.total + ' packages' : this.pkCount(c.n)) + ' · ' + c.by + ' · ' + c.at,
+      undo: () => this.undo(c),
+      print: () => this.sendReceipt(this.state.printer || 'Back office', c)
+    }));
+    const done = { rows: doneF, has: doneF.length > 0, none: doneF.length === 0, heading: q ? 'Searching all windows and dates' : 'Completed today · latest first', noneText: q ? 'No completed pickup matches “' + st.q + '”' : 'Pickups show up here once they’re complete.' };
+
+    // ---- move to a window (web: Move to another window). Phone operators have no window of their own.
+    const WINS = ['Window 1', 'Window 2', 'Window 3', 'Window 4'];
+    const mvStu = st.moveFor === 'mine' ? (m ? m.s : null) : st.moveFor === 'up' ? upNext : null;
+    const mvPulled = st.moveFor === 'mine' && m ? m.scanned.length : 0;
+    const doMove = () => {
+      const to = this.state.moveTo, who = this.state.moveFor, cur = this.state;
+      const stu = who === 'mine' ? (cur.mine && cur.mine.s) : upNext;
+      if (!stu || !to) return;
+      const moved = Object.assign({}, stu, { by: 'Moved by you · ' + to, min: 0 });
+      const prevMine = cur.mine;
+      const patch = { moveFor: null, moveTo: null, others: cur.others.concat([moved]) };
+      if (who === 'mine') Object.assign(patch, { mine: null, screen: null });
+      else patch.queue = cur.queue.filter((x) => x.t !== stu.t);
+      this.setState(patch);
+      this.toast(stu.t + ' moved to ' + to, 'success', () => {
+        const c2 = this.state; const back = { others: c2.others.filter((o) => o !== moved) };
+        if (who === 'mine' && !c2.mine) back.mine = prevMine; else if (who === 'up') back.queue = c2.queue.concat([stu]);
+        this.setState(back); this.toast(stu.t + ' is back with you', 'neutral');
+      });
+    };
+    const mv = {
+      open: !!mvStu, ticket: mvStu ? mvStu.t : '', name: mvStu ? mvStu.name : '',
+      openMine: () => { this.kbClose(); this.setState({ moveFor: 'mine', moveTo: null }); },
+      openUp: () => { this.kbClose(); this.setState({ moveFor: 'up', moveTo: null }); },
+      close: () => this.setState({ moveFor: null, moveTo: null }),
+      noPick: !st.moveTo, goLabel: st.moveTo ? 'Move to ' + st.moveTo : 'Choose a window', go: doMove,
+      hasNote: mvPulled > 0, note: 'Bring the ' + this.pkCount(mvPulled) + ' you pulled to ' + (st.moveTo || 'that window') + '. The pickup starts fresh there.',
+      wins: WINS.map((w) => {
+        const at = st.others.filter((o) => (o.by || '').indexOf(w) >= 0);
+        const on = st.moveTo === w;
+        return { name: w, on, status: at.length ? 'Serving ' + at.map((o) => o.t).join(', ') : 'Available', dot: at.length ? 'var(--color-fg-warning-secondary)' : 'var(--color-fg-success-secondary)', bg: on ? 'var(--color-bg-brand-primary)' : 'var(--color-bg-primary)', ring: on ? 'inset 0 0 0 2px var(--color-brand-600)' : 'inset 0 0 0 1px var(--color-border-secondary)', pick: () => this.setState({ moveTo: w }) };
+      })
+    };
+
+    // ---- tabs
+    const tabDef = [['queue', 'Checked in', st.queue.length], ['serving', 'Serving', servRows.length], ['done', 'Completed', st.baseServed + st.done.length]];
+    const qTabs = tabDef.map(([k, label, count]) => {
+      const sel = st.qTab === k;
+      return { label, count, sel, bg: sel ? 'var(--color-bg-primary)' : 'transparent', shadow: sel ? '0 3px 8px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04)' : 'none', color: sel ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', go: () => this.setState({ qTab: k }) };
+    });
+    const inDef = [['inbox', 'Inbox', null], ['pickup', 'Pickup Queue', st.queue.length], ['containers', 'Containers', null], ['research', 'Research Required', null]];
+    const inTabs = inDef.map(([k, label, count]) => {
+      const sel = st.inTab === k;
+      return { label, count, hasCount: count !== null, sel, line: sel ? 'var(--color-bg-brand-solid)' : 'transparent', color: sel ? 'var(--color-text-primary)' : 'var(--color-text-quaternary)', go: () => (k === 'inbox' || k === 'pickup' ? this.setState({ inTab: k }) : this.dead()) };
+    });
+    const barItem = (k, live) => {
+      const cur = (k === 'home' && st.view === 'home') || (k === 'inbound' && st.view === 'inbound');
+      return { cur, color: cur ? 'var(--color-text-brand-secondary)' : 'var(--color-text-quaternary)', go: live ? () => { this.kbClose(); this.setState({ view: k, protoOpen: false }); } : () => this.dead() };
+    };
+
+    // ---- my pickup
+    let mine = {};
+    if (m) {
+      const total = m.s.pk.length, n = m.scanned.length;
+      const sortedPk = this.pkSorted(m.s, m.s.pk);
+      const items = sortedPk.map((p, i) => {
+        const got = m.scanned.indexOf(p.id) >= 0;
+        return Object.assign(this.pkGroup(m.s, sortedPk, i), {
+          grpRm: !!m.s.guest && !!p.owner, grpRemove: () => this.guestRemove(p.owner), grpRmLabel: 'Remove ' + (p.owner || ''),
+          rule: rule(i), loc: (p.shelf === 'Floor' ? 'Floor · ' : 'Shelf ' + p.shelf + ' · ') + p.cell,
+          desc: p.size + ' · ' + p.carrier + ' ••• ' + p.trk.slice(-4), short: p.carrier + ' ••• ' + p.trk.slice(-4),
+          remove: () => {
+            const mm = this.state.mine; if (!mm) return;
+            const rs = this.rescan(mm, mm.scanned.filter((x) => x !== p.id));
+            this.setState({ mine: rs.mine });
+            this.toast(p.cell + ' removed' + (rs.had ? '. Confirm it’s them again.' : ''), 'neutral', () => { const m2 = this.state.mine; if (m2 && m2.scanned.indexOf(p.id) < 0) { const r2 = this.rescan(m2, m2.scanned.concat([p.id])); this.setState({ mine: r2.mine }); if (r2.had) this.toast('Packages changed. Confirm it’s them again.', 'info'); } }, 'Undo');
+          },
+          got, todo: !got, locFg: got ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+          fg: got ? 'var(--color-fg-success-primary)' : 'var(--color-fg-quaternary)', state: got ? 'Scanned' : 'To pull'
+        });
+      });
+      // Package list as rounded containers: one per owner group (proxy or guest), else one for the whole list.
+      items.forEach((it, i) => {
+        const own = (x) => sortedPk[x] && (sortedPk[x].owner || m.s.name);
+        const first = i === 0 || own(i - 1) !== own(i), last = i === items.length - 1 || own(i + 1) !== own(i);
+        const hdr = !!it.grpOn;
+        it.mt = i === 0 ? '4px' : '12px';
+        it.rmt = first && !hdr ? it.mt : '0';
+        it.rTop = first && !hdr ? '1px solid var(--color-border-secondary)' : '0';
+        it.rRad = (first && !hdr ? '12px 12px ' : '0 0 ') + (last ? '12px 12px' : '0 0');
+      });
+      const signed = !!(m.sig && !m.sig.skipped);
+      const skipped = !!(m.sig && m.sig.skipped);
+      const proofOk = !!m.idAt || !!m.sig;
+      const enough = st.partial ? n > 0 : n === total;
+      const cant = !(proofOk && enough);
+      let hint = '';
+      if (m.s.guest && !total) hint = 'Find who ' + m.s.name.split(' ')[0] + ' is picking up for.';
+      else if (n === 0) hint = 'Scan at least one package to complete.';
+      else if (!enough) hint = 'Scan all ' + total + ' packages to complete. Partial pickup is off for this mailroom.';
+      else if (!proofOk && m.s.guest) hint = 'Check a photo ID and get a signature to complete.';
+      else if (!proofOk) hint = 'Scan their ID or get a signature to complete.';
+      else if (n < total) hint = (total - n) + (total - n === 1 ? ' package stays' : ' packages stay') + ' ready for a later pickup.';
+      const done1 = !!m.idAt, done2 = n === total, done3 = proofOk;
+      const dot = (d) => (d ? ['var(--color-bg-success-solid)', '#FFFFFF'] : ['rgba(118, 118, 128, 0.12)', 'var(--color-text-secondary)']);
+      const annBusy = st.annUntil > now;
+      const mk = (state) => state === 'done'
+        ? { bg: 'var(--color-bg-brand-solid)', fg: '#FFFFFF', ring: 'none', title: 'var(--color-text-primary)' }
+        : state === 'current'
+          ? { bg: 'var(--color-bg-primary)', fg: 'var(--color-text-brand-secondary)', ring: 'inset 0 0 0 2px var(--color-border-brand), 0 0 0 4px var(--color-bg-brand-primary)', title: 'var(--color-text-primary)' }
+          : { bg: 'var(--color-bg-primary)', fg: 'var(--color-text-quaternary)', ring: 'inset 0 0 0 1.5px var(--color-border-primary)', title: 'var(--color-text-tertiary)' };
+      const k1 = mk(done2 ? 'done' : 'current');
+      const k2 = mk(done3 ? 'done' : n > 0 ? 'current' : 'upcoming');
+      mine = {
+        t: m.s.t, name: m.s.name, ini: this.ini(m.s.name), sid: m.s.sid, mail: m.s.mail,
+        guest: !!m.s.guest, notGuest: !m.s.guest, gNone: !!m.s.guest && !(m.s.px && m.s.px.for.length), gSome: !!m.s.guest && !!(m.s.px && m.s.px.for.length),
+        gWho: 'Who is ' + m.s.name.split(' ')[0] + ' picking up for?', gWhoHint: 'Find the student they name. Only students who added ' + m.s.name.split(' ')[0] + ' in the app can be added.',
+        stepsDisp: m.s.guest && !(m.s.px && m.s.px.for.length) ? 'none' : 'flex', canScanId: !m.s.guest,
+        skipLabel: m.s.guest ? 'Can’t sign?' : 'Can’t sign or scan?',
+        lockText: m.s.guest ? 'Scan a package first. Then check a photo ID and have them sign.' : 'Scan a package first. Then scan their ID or have them sign.',
+        photo: photo(m.s.name), hasPhoto: !!photo(m.s.name), noPhoto: !photo(m.s.name), zoom: zoomOf(m.s.name, m.s.sid),
+        progress: n + ' of ' + total + ' scanned' + (m.idAt || m.sig ? ' · ID confirmed' : ''),
+        printed: !!m.printedAt, printedAt: m.printedAt, printedTo: m.printedTo, printLabel: m.printedAt ? 'Print again' : 'Print pick list', printAria: m.printedAt ? 'Print the pick list again' : 'Print pick list', printMb: m.printedAt ? '0px' : '-6px',
+        idHint: m.s.guest ? 'Check a photo ID, like a driver’s license. Then have them sign.' : photo(m.s.name) ? 'Compare their face with the photo above, then scan their ID or have them sign.' : 'No photo on file. Scan their ID, or check the photo on their card and have them sign.',
+        idDoneHint: photo(m.s.name) ? 'Compare their face with the photo above.' : 'No photo on file. Check the photo on their card.',
+        timer: mins(Math.floor((now - m.startedAt) / 60000)),
+        items, scanCount: n + ' of ' + total,
+        moreToScan: n < total, allScanned: n === total, proofOk, proofNo: !proofOk,
+        scanBtnLabel: n ? 'Scan more packages' : 'Scan packages', scanBtnColor: 'secondary',
+        picked: !!st.picking, notPicked: !st.picking, relVis: st.picking ? 'hidden' : 'visible',
+        pxOn: !!m.s.px, pxHeader: this.pxHeader(m.s),
+        idDone: done1, idTodo: !done1, idAt: m.idAt, idWord: m.idTyped ? 'ID typed' : 'ID scanned',
+        proofById: done1, signed, skipped, proofTodo: !done1 && !m.sig, idLocked: n === 0, idUnlocked: n > 0,
+        sigD: st.sigD, sigAt: m.sig && m.sig.at, note: m.sig && m.sig.note,
+        pickCount: this.pkCount(n || total),
+        cantComplete: cant, completeOpacity: cant ? '0.5' : '1',
+        spotOn: !!st.spotStep && st.screen === 'serve', spot1: st.spotStep === 1 ? 'spot-step' : '', spot2: st.spotStep === 2 ? 'spot-step' : '', spot1z: st.spotStep === 1 ? '4' : 'auto', spot2z: st.spotStep === 2 ? '4' : 'auto', completeLabel: n && n < total && st.partial ? 'Complete ' + n + ' of ' + total : 'Complete pickup',
+        hint, hasHint: !!hint,
+        annBusy, annLabel: annBusy ? 'Calling…' : 'Announce',
+        k1bg: k1.bg, k1fg: k1.fg, k1ring: k1.ring, k1title: k1.title, k2bg: k2.bg, k2fg: k2.fg, k2ring: k2.ring, k2title: k2.title,
+        s1bg: dot(done1)[0], s1fg: dot(done1)[1], s2bg: dot(done2)[0], s2fg: dot(done2)[1], s3bg: dot(done3)[0], s3fg: dot(done3)[1]
+      };
+    }
+
+    // ---- camera
+    const camItems = isCam && st.camMode === 'items';
+    const camId = isCam && st.camMode === 'id';
+    const camServe = isCam && st.camMode === 'serveId';
+    const camCheckin = isCam && st.camMode === 'checkinId';
+    const cam = {
+      items: camItems, id: camId, anyId: camId || camServe || camCheckin, anyCam: !!(camItems || camId || camServe || camCheckin),
+      typeInstead: () => { if (camItems) { this.setState({ protoOpen: false, sheet: 'type', typeFor: null, typeQ: '', typeBad: false }); return; } if (camCheckin || camServe) { this.setState({ screen: camCheckin && this.state.mine && this.state.returnScreen === 'serve' ? 'serve' : null, camMode: null, camAlert: null, protoOpen: false, sheet: 'type', typeFor: camCheckin ? '__idCheckin' : '__idServe', typeQ: '', typeBad: false, kb: 'type', kbShift: false, kbNum: true }); } else { this.setState({ screen: 'serve', camMode: null, camAlert: null, protoOpen: false, sheet: 'type', typeFor: '__id', typeQ: '', typeBad: false, kb: 'type', kbShift: false, kbNum: true }); } },
+      title: camCheckin ? 'Scan ID to check in' : camServe ? 'Scan a student ID' : camId ? 'Scan student ID' : 'Scan packages',
+      hint: camCheckin ? 'Scanning checks them in at the end of the line. It doesn’t start serving.' : camServe ? 'Scan any student’s ID to serve them now, even if they aren’t next.' : camId ? 'Hold the barcode on the back of their ID inside the frame.' : 'Point at the barcode on each label. Scans add automatically.',
+      // One scan frame for every camera (ID and package): same size, same position.
+      boxW: '344px', boxH: '230px',
+      boxColor: st.camAlert ? '#F97066' : '#47CD89',
+      hasAlert: !!st.camAlert, alertTitle: st.camAlert && st.camAlert.title, alertText: st.camAlert && st.camAlert.text,
+      hasFlash: !!st.camFlash && !st.camAlert && !camItems, flash: st.camFlash
+    };
+
+    // ---- package scan sheet
+    let cs = {};
+    if (m && camItems) {
+      const tot = m.s.pk.length, got = m.scanned.length;
+      const loc = (p) => (p.shelf === 'Floor' ? 'Floor · ' : 'Shelf ' + p.shelf + ' · ') + p.cell;
+      const srt = this.pkSorted(m.s, m.s.pk);
+      const srtTodo = srt.filter((p) => m.scanned.indexOf(p.id) < 0), srtDone = srt.filter((p) => m.scanned.indexOf(p.id) >= 0);
+      const todo = srtTodo.map((p, i) => Object.assign(this.pkGroup(m.s, srtTodo, i, m.s.pk), { loc: loc(p), desc: p.size + ' · ' + p.carrier + ' ••• ' + p.trk.slice(-4), type: () => this.setState({ sheet: 'type', typeFor: p.id, typeQ: '', typeBad: false }) }));
+      const done = srtDone.map((p, i) => Object.assign(this.pkGroup(m.s, srtDone, i, m.s.pk), { loc: loc(p), desc: p.size + ' · ' + p.carrier + ' ••• ' + p.trk.slice(-4), remove: () => { const mm = this.state.mine; clearTimeout(this._flashT); const rs = this.rescan(mm, mm.scanned.filter((x) => x !== p.id)); this.setState({ mine: rs.mine, camFlash: p.cell + ' removed' + (rs.had ? '. Confirm it’s them again.' : ''), camUndo: p.id }); this._flashT = setTimeout(() => this.setState({ camFlash: null, camUndo: null }), 5000); } }));
+      const open = !!st.camOpen;
+      cs = {
+        open, closed: !open, pos: open ? 'absolute' : 'relative', top: open ? '56px' : 'auto',
+        n: got, total: tot, noScans: got === 0,
+        barClass: got === tot && tot > 0 ? 'bg-fg-success-secondary' : '',
+        countText: got === tot && tot > 0 ? 'All ' + tot + ' scanned ✓' : got + ' of ' + tot,
+        countFg: got === tot && tot > 0 ? 'var(--color-text-success-primary)' : 'var(--color-text-tertiary)',
+        countWeight: got === tot && tot > 0 ? '600' : '500',
+        doneCls: got === tot && tot > 0 ? 'done-pulse' : '',
+        hint: open ? 'Can’t scan one? Tap the pencil to type its number.' : 'Swipe up to see all packages',
+        handleLabel: open ? 'Collapse the package list' : 'Show all packages',
+        todo, done, hasTodo: todo.length > 0, hasDone: done.length > 0, todoN: todo.length, doneN: done.length,
+        hasFlash: !!st.camFlash && !st.camAlert, flash: st.camFlash,
+        flashAbove: !!st.camFlash && !st.camAlert && !open, flashInside: !!st.camFlash && !st.camAlert && open,
+        hasUndo: !!st.camUndo,
+        undoRemove: () => { const mm = this.state.mine, id = this.state.camUndo; clearTimeout(this._flashT); if (mm && id && mm.scanned.indexOf(id) < 0) { const rs = this.rescan(mm, mm.scanned.concat([id])); this.setState({ mine: rs.mine }); if (rs.had) setTimeout(() => this.toast('Packages changed. Confirm it’s them again.', 'info'), 0); } this.setState({ camFlash: null, camUndo: null }); },
+        toggle: () => this.setState({ camOpen: !this.state.camOpen }),
+        expand: () => this.setState({ camOpen: true }), collapse: () => this.setState({ camOpen: false }),
+        cantScan: () => (this.state.camOpen ? this.setState({ sheet: 'type', typeFor: null, typeQ: '', typeBad: false }) : this.setState({ camOpen: true })),
+        down: (e) => { this._dragY = e.clientY; this._dragged = false; },
+        up: (e) => { if (this._dragY == null) return; const dy = e.clientY - this._dragY; this._dragY = null; if (dy < -24) { this._dragged = true; this.setState({ camOpen: true }); } else if (dy > 24) { this._dragged = true; this.setState({ camOpen: false }); } },
+        handleClick: () => { if (this._dragged) { this._dragged = false; return; } this.setState({ camOpen: !this.state.camOpen }); }
+      };
+    }
+
+    // ---- guest: find who they're picking up for (same rules as the web drawer)
+    const gs = m && m.s.guest ? m.s : null;
+    const gFirst = gs ? gs.name.split(' ')[0] : '';
+    const gqRaw = (st.gq || '').trim(), gq = gqRaw.toLowerCase();
+    const gAdded = gs && gs.px ? gs.px.for.map((r) => r.sid) : [];
+    const gHits = gs && gq.length >= 3 ? st.guestPool.filter((p) => (p.name + ' ' + p.sid).toLowerCase().indexOf(gq) >= 0) : [];
+    const gOk = (p) => p.auth.indexOf(gs.name) >= 0;
+    const gAllowed = gHits.filter(gOk), gOther = gHits.filter((p) => !gOk(p));
+    // Authorized matches first; if none listed the guest, up to 3 show grayed out so the operator can confirm.
+    const gShown = gAllowed.length ? gAllowed : gOther.slice(0, 3);
+    const gMoreN = gAllowed.length ? gOther.length : Math.max(0, gOther.length - 3);
+    const gOne = !gAllowed.length && gOther.length === 1 ? gOther[0] : null;
+    const gMany = !gAllowed.length && gOther.length > 1;
+    const guest = {
+      open: () => this.setState({ sheet: 'guest', gq: '' }),
+      remove: () => this.guestOut(),
+      q: st.gq || '', set: (v) => this.setState({ gq: v }),
+      intro: gFirst + ' is picking up as a guest. Only students who added ' + gFirst + ' in the app can be added.',
+      hint: !!gs && gq.length < 3,
+      rows: gShown.map((p) => { const ok = gOk(p), added = gAdded.indexOf(p.sid) >= 0; return { name: p.name, ini: this.ini(p.name), op: ok ? '1' : '0.5', sub: ok ? 'Student ID ' + p.sid + ' · ' + this.pkCount(p.pk.length) : gFirst + ' isn’t on ' + p.pr + ' pickup list', canAdd: ok && !added, added, addLabel: 'Add ' + p.name, add: () => this.guestAdd(p) }; }),
+      has: gShown.length > 0,
+      hasMore: gMoreN > 0, moreText: gMoreN + (gAllowed.length ? ' more ' : ' other ') + (gMoreN === 1 ? 'student matches' : 'students match') + ' “' + gqRaw + '” but ' + (gMoreN === 1 ? 'hasn’t' : 'haven’t') + ' added ' + gFirst + '.',
+      noMatch: !!gs && gq.length >= 3 && !gHits.length, noMatchText: 'No students match “' + gqRaw + '”.',
+      blocked: !!gOne || gMany,
+      blockTitle: gOne ? gFirst + ' can’t pick up for ' + gOne.name.split(' ')[0] : gMany ? 'None of these students added ' + gFirst : '',
+      blockText: gOne ? gOne.name.split(' ')[0] + ' can add ' + gFirst + ' as a pickup person in the app. Then ' + gFirst + ' can check in again.' : gMany ? 'Ask for the student’s full name to narrow it down. A student can add ' + gFirst + ' as a pickup person in the app.' : ''
+    };
+
+    // ---- check-in sheet
+    const cq = st.ciQ.trim().toLowerCase();
+    // While typing, students already in line who match are listed too, tagged "In line · number", with no Check in.
+    const ciLine = cq ? st.queue.filter((r) => (r.name + ' ' + r.sid).toLowerCase().indexOf(cq) >= 0) : [];
+    const ciRows = st.ready.filter((r) => !cq || (r.name + ' ' + r.sid).toLowerCase().indexOf(cq) >= 0).map((r, i) => ({
+      name: r.name, sid: r.sid, ini: this.ini(r.name), photo: photo(r.name), rule: rule(i), pkShort: this.pkCount(r.pk.length), ready: true, inLine: false, lineLabel: '',
+      checkIn: () => {
+        const t = 'A' + st.nextNum;
+        this.kbClose();
+        this.setState({ ready: st.ready.filter((x) => x !== r), queue: st.queue.concat([Object.assign({ t, wait: 0, via: 'Checked in by you' }, r)]), nextNum: st.nextNum + 1, sheet: null, ciQ: '', qTab: 'queue' });
+        this.toast(t + ' · ' + r.name + ' checked in');
+      }
+    })).concat(ciLine.map((r) => ({ name: r.name, sid: r.sid, ini: this.ini(r.name), photo: photo(r.name), rule: 'var(--color-border-secondary)', pkShort: this.pkCount(r.pk.length), ready: false, inLine: true, lineLabel: 'In line · ' + r.t, checkIn: () => {} })));
+    ciRows.forEach((w, i) => { w.rule = rule(i); });
+
+    // ---- release sheet
+    const relItems = m ? m.s.pk.filter((p) => m.scanned.indexOf(p.id) >= 0).map((p) => ({ loc: (p.shelf === 'Floor' ? 'Floor · ' : 'Shelf ' + p.shelf + ' · ') + p.cell, short: p.carrier + ' ••• ' + p.trk.slice(-4) })) : [];
+    const rel = {
+      items: relItems, needsPutBack: relItems.length > 0, ok: st.relOk,
+      text: m ? (relItems.length ? 'Return the ' + this.pkCount(relItems.length) + ' you pulled to their shelves. ' + m.s.name.split(' ')[0] + ' then goes back to their place in line.' : 'Return any packages you pulled to their shelves. ' + m.s.name.split(' ')[0] + ' goes back to their place in line.') : '',
+      blocked: relItems.length > 0 && !st.relOk,
+      toggle: (v) => this.setState({ relOk: !!v }),
+      confirm: () => this.release()
+    };
+
+    // ---- type a number
+    // One "Type their student ID" sheet for every ID camera; only the outcome differs (proof, serve now, or check in).
+    const tyId = st.typeFor === '__id' || st.typeFor === '__idServe' || st.typeFor === '__idCheckin';
+    const tyLookup = st.typeFor === '__idServe' || st.typeFor === '__idCheckin';
+    const tyCheck = () => {
+      const v = this.state.typeQ.replace(/\s+/g, '').toUpperCase();
+      const mm = this.state.mine;
+      if (this.state.typeFor === '__idServe' || this.state.typeFor === '__idCheckin') {
+        const dig = (x) => String(x || '').replace(/\D/g, '');
+        const d = dig(v), cur = this.state;
+        const inLine = cur.queue.find((x) => dig(x.sid) === d);
+        const ready = cur.ready.find((x) => dig(x.sid) === d);
+        const other = cur.others.find((x) => dig(x.sid) === d);
+        const none = 'No student with that ID is checked in or has packages ready.';
+        if (this.state.typeFor === '__idCheckin') {
+          if (ready) {
+            const t = 'A' + cur.nextNum;
+            this.kbClose();
+            this.setState({ sheet: null, typeQ: '', typeFor: null, typeBad: false, ciQ: '', ready: cur.ready.filter((x) => x !== ready), queue: cur.queue.concat([Object.assign({ t, wait: 0, via: 'Checked in by you' }, ready)]), nextNum: cur.nextNum + 1, qTab: 'queue' });
+            this.toast(t + ' · ' + ready.name + ' checked in');
+            return;
+          }
+          if (inLine) { this.kbClose(); this.setState({ sheet: 'checkin', typeQ: '', typeFor: null, typeBad: false }); this.toast(inLine.name + ' is already in line as ' + inLine.t, 'neutral'); return; }
+          this.setState({ typeBad: none }); return;
+        }
+        // Serve now, same as a scan at the window: in line, packages ready (new number), or being served elsewhere.
+        let pp = null;
+        if (inLine) pp = { kind: 'line', s: inLine };
+        else if (ready) pp = { kind: 'new', s: Object.assign({ t: 'A' + cur.nextNum, wait: 0, via: 'ID typed' }, ready), ready };
+        else if (other) pp = { kind: 'other', s: { t: other.t, name: other.name, sid: other.sid || '', mail: other.mail || 'Mail code —', wait: other.min, via: 'Kiosk', pk: other.pk || [] }, other };
+        if (!pp) { this.setState({ typeBad: none }); return; }
+        // One student at a time: Scan ID doesn't open while serving (it pulses like Serve); this is a safety net.
+        if (cur.mine) { this.kbClose(); this.setState({ sheet: null, typeQ: '', typeFor: null, typeBad: false }); this.serve(); return; }
+        pp.typed = true; // recorded as "ID typed" (weaker proof than a scan)
+        this.kbClose();
+        this.setState({ sheet: null, typeQ: '', typeFor: null, typeBad: false });
+        this.startScanned(pp);
+        return;
+      }
+      if (this.state.typeFor === '__id') {
+        const dig = (x) => x.replace(/\D/g, '');
+        const rcp = mm && mm.s.px && mm.s.px.for.find((r) => dig(r.sid) === dig(v));
+        if (rcp) { this.setState({ typeBad: 'That’s ' + rcp.name + '’s ID. Type ' + mm.s.name + '’s ID. They’re the one picking up.' }); return; }
+        if (!mm || dig(v) !== dig(mm.s.sid)) { this.setState({ typeBad: true }); return; }
+        this.kbClose();
+        this.setState({ sheet: null, typeQ: '', typeFor: null, screen: 'serve', mine: Object.assign({}, mm, { idAt: this.clock(), idTyped: true }) });
+        this.toast('ID matches ' + mm.s.name);
+        return;
+      }
+      const p = mm && mm.s.pk.find((x) => x.trk.toUpperCase() === v && (!this.state.typeFor || x.id === this.state.typeFor));
+      if (!p) { this.setState({ typeBad: true }); return; }
+      this.kbClose();
+      this.setState({ sheet: null, typeQ: '', typeFor: null });
+      this.scanItem(p);
+    };
+    const ty = {
+      q: st.typeQ, empty: !st.typeQ.trim(), bad: !!st.typeBad,
+      label: tyId ? 'Student ID' : 'Tracking number', ph: tyId ? 'Number on their ID card' : 'Full number from the label', btn: tyId ? 'Confirm ID' : 'Add package',
+      title: tyId ? 'Type their student ID' : (() => { const tp = st.typeFor && m && m.s.pk.find((x) => x.id === st.typeFor); return tp ? 'Type the number for ' + (tp.shelf === 'Floor' ? 'Floor · ' : 'Shelf ' + tp.shelf + ' · ') + tp.cell : 'Type a tracking number'; })(),
+      hint: tyLookup ? (typeof st.typeBad === 'string' ? st.typeBad : (st.typeFor === '__idCheckin' ? 'Works the same as scanning their card: checks them in.' : 'Works the same as scanning their card: serves them now.')) : tyId ? (typeof st.typeBad === 'string' ? st.typeBad : st.typeBad ? 'That doesn’t match ' + (m ? m.s.name : 'this student') + '’s student ID.' : 'Check the card yourself. A typed ID is saved as weaker proof than a scan.') : st.typeBad ? 'That number doesn’t match ' + (m ? m.s.name : 'this student') + '’s packages. Check the label.' : 'Type the full number, same as a scan.',
+      set: (v) => this.setState({ typeQ: v, typeBad: false }),
+      check: tyCheck
+    };
+
+    // ---- signature pad
+    const sig = {
+      d: st.sigD, empty: !st.sigD,
+      down: (e) => { try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} this._drawing = true; this._strokes.push([this.pt(e)]); this.setState({ sigD: this.dString() }); },
+      move: (e) => { if (!this._drawing) return; this._strokes[this._strokes.length - 1].push(this.pt(e)); this.setState({ sigD: this.dString() }); },
+      up: () => { this._drawing = false; },
+      clear: () => { this._strokes = []; this.setState({ sigD: '' }); },
+      done: () => { this.setState({ mine: Object.assign({}, m, { sig: { at: this.clock() } }), screen: 'serve' }); }
+    };
+
+    // ---- keyboard
+    const L1 = 'qwertyuiop', L2 = 'asdfghjkl', L3 = 'zxcvbnm';
+    const N1 = '1234567890', N2 = '-/:;()$&@', N3 = '.,?!\'"#';
+    const caps = st.kbShift && !st.kbNum;
+    const keys = (s) => s.split('').map((c) => ({ label: caps ? c.toUpperCase() : c, press: () => this.kbType(c) }));
+    const cur = st.kb ? this.kbGet(st.kb) : '';
+    const word = (cur.split(/\s+/).pop() || '');
+    const pool = st.kb === 'search' ? st.queue.map((x) => x.name.split(' ')[0]).concat(st.done.map((x) => x.name.split(' ')[0])) : st.kb === 'ci' ? st.ready.map((x) => x.name.split(' ')[0]) : st.kb === 'note' ? ['Refused', 'Showed', 'ID'] : [];
+    const matches = word ? pool.filter((w, i) => pool.indexOf(w) === i && w.toLowerCase().indexOf(word.toLowerCase()) === 0 && w.toLowerCase() !== word.toLowerCase()) : [];
+    const base = word ? ['“' + word + '”'].concat(matches.slice(0, 2)) : (st.kb === 'note' ? ['Refused', 'Showed', 'ID'] : ['I', 'The', 'A']);
+    while (base.length < 3) base.push(['the', 'and', 'to'][base.length]);
+    const sugs = base.slice(0, 3).map((label, i) => ({
+      label, rule: i ? '1px solid #B5B8BE' : '0', weight: i === 1 && word && matches.length ? '600' : '400',
+      pick: () => { const t = st.kb; if (!t) return; const w = label.replace(/[“”]/g, ''); const head = cur.slice(0, cur.length - word.length); this.kbSet(t, head + w + (t === 'note' ? ' ' : '')); }
+    }));
+    const retMap = { search: 'search', ci: 'search', type: 'done', note: 'return' };
+    const retLabel = retMap[st.kb] || 'return';
+    const kb = {
+      open: kbOpen, sugs,
+      r1: keys(st.kbNum ? N1 : L1), r2: keys(st.kbNum ? N2 : L2), r3: keys(st.kbNum ? N3 : L3),
+      shift: () => this.setState({ kbShift: !st.kbShift }), shiftBg: caps ? '#FFFFFF' : '#ABB0BA', shiftGlyph: st.kbNum ? '#+=' : '⇧', shiftLabel: 'Shift',
+      del: () => { const t = st.kb; if (t) this.kbSet(t, this.kbGet(t).slice(0, -1)); },
+      space: () => this.kbType(' '),
+      mode: () => this.setState({ kbNum: !st.kbNum }), modeLabel: st.kbNum ? 'ABC' : '123',
+      retLabel, retBg: retLabel === 'return' ? '#ABB0BA' : 'var(--color-bg-brand-solid)', retFg: retLabel === 'return' ? '#000000' : '#FFFFFF',
+      ret: () => { const t = st.kb; if (t === 'type') { tyCheck(); return; } if (t === 'note') { this.kbSet('note', this.kbGet('note') + '\n'); return; } this.kbClose(); },
+      hold: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      focusGq: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbOpen('gq'); },
+      blurGq: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbBlur(); },
+      focusCiIn: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbOpen('ci'); },
+      blurCiIn: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbBlur(); },
+      focusSearch: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbOpen('search'); },
+      blurSearch: (e) => { if (e && e.target && e.target.tagName !== 'INPUT') return; this.kbBlur(); }, focusCi: () => this.kbOpen('ci'), focusType: () => this.kbOpen('type'), focusNote: () => this.kbOpen('note'),
+      blur: () => this.kbBlur(),
+      scrollClose: () => { if (this.state.kb === 'search' && !this.state.q) this.kbClose(); },
+      lift: kbOpen ? '302px' : '0px',
+      pad: searchFocus ? '420px' : kbOpen ? '360px' : '24px'
+    };
+
+    // ---- toast
+    const toast = st.toast ? {
+      show: true, text: st.toast.text, variant: st.toast.variant,
+      isSuccess: st.toast.variant === 'success', isWarning: st.toast.variant === 'warning' || st.toast.variant === 'error', isInfo: st.toast.variant !== 'success' && st.toast.variant !== 'warning' && st.toast.variant !== 'error',
+      iconFg: st.toast.variant === 'success' ? '#75E0A7' : st.toast.variant === 'warning' || st.toast.variant === 'error' ? '#FEC84B' : 'rgba(255, 255, 255, 0.8)',
+      role: st.toast.variant === 'warning' || st.toast.variant === 'error' ? 'alert' : 'status',
+      hasUndo: !!st.toast.undo, actionLabel: st.toast.label || 'Undo',
+      undoPress: () => { const fn = st.toast.undo; clearTimeout(this._toastT); this.setState({ toast: null }); if (fn) fn(); },
+      bottom: searchFocus ? '408px' : kbOpen ? '348px' : isServe ? '192px' : '95px'
+    } : { show: false };
+    const chrome = { fg: isCam || st.zoom ? '#FFFFFF' : '#000000' };
+
+    const simNext = () => { const p = m && m.s.pk.find((x) => m.scanned.indexOf(x.id) < 0); if (p) this.scanItem(p); else this.setState({ camFlash: 'All packages are already scanned' }); };
+    const proto = {
+      open: st.protoOpen, trigColor: isCam && !camItems ? '#FFFFFF' : '#1E1E1E',
+      toggle: () => this.setState({ protoOpen: !st.protoOpen }),
+      waits: [['normal', 'Normal waits'], ['mixed', 'Some late (15+ and 20+)'], ['late', 'Everyone late']].map(([k, label]) => { const on = (st.waitMode || 'normal') === k; return { label: (on ? '✓ ' : '') + label, on, bg: on ? 'rgba(127,127,127,0.18)' : 'none', pick: () => this.simWaits(k) }; }),
+      camItems, camId, camServe, camCheckin,
+      ciNewLabel: st.ready.length ? 'Not checked in yet (' + st.ready[0].name.split(' ')[0] + ')' : 'Not checked in yet (none left)',
+      ciScanNew: () => this.scanCheckIn('new'), ciScanIn: () => this.scanCheckIn('in'), ciScanNone: () => this.scanCheckIn('none'),
+      scanInLine: () => this.scanServe('line'), scanNotIn: () => this.scanServe('new'), scanOther: () => this.scanServe('other'), scanNone: () => this.scanServe('none'),
+      seeNext: () => { this.setState({ protoOpen: false }); simNext(); },
+      seeWrong: () => this.setState({ protoOpen: false, camFlash: null, camAlert: { title: 'This package isn’t for ' + (m ? m.s.name : '') + '.', text: 'It belongs to Marcus Lee · Shelf B · B7. Put it back.' } }),
+      seeUnknown: () => this.setState({ protoOpen: false, camFlash: null, camAlert: { title: 'Label not found.', text: 'This tracking number isn’t in Delivery CTRL. Check the label or set it aside for research.' } }),
+      seeId: () => { this.setState({ protoOpen: false, screen: 'serve', camMode: null, camAlert: null, mine: Object.assign({}, m, { idAt: this.clock() }) }); this.toast('ID matches ' + m.s.name); },
+      hasPx: !!(m && m.s.px), recipLabel: m && m.s.px ? 'A recipient’s ID (' + m.s.px.for[0].name.split(' ')[0] + ')' : '',
+      seeRecipId: () => { const r = m.s.px.for[0]; this.setState({ protoOpen: false, camFlash: null, camAlert: { title: 'That’s ' + r.name + '’s ID.', text: 'Scan ' + m.s.name + '’s ID. They’re the one picking up. Nothing was released.' } }); },
+      seeOtherId: () => this.setState({ protoOpen: false, camAlert: { title: 'This ID belongs to Marcus Lee.', text: 'It isn’t ' + (m ? m.s.name : '') + '’s. Nothing was released.' } }),
+      arrive: () => {
+        const r = st.ready[0];
+        this.setState({ protoOpen: false });
+        if (!r) { this.toast('No more students with packages ready', 'neutral'); return; }
+        const t = 'A' + st.nextNum;
+        this.setState({ ready: st.ready.slice(1), queue: st.queue.concat([Object.assign({ t, wait: 0, via: 'Student app' }, r)]), nextNum: st.nextNum + 1 });
+        this.toast(r.name + ' checked in on the app', 'neutral');
+      },
+      race: st.race, raceLabel: st.race ? '✓ Next Serve: someone claims first' : 'Next Serve: someone claims first',
+      toggleRace: () => this.setState({ protoOpen: false, race: !st.race }),
+      emptyLabel: st.emptied ? 'Restore the queue' : 'Empty the queue',
+      toggleEmpty: () => this.setState(st.emptied ? { protoOpen: false, queue: st.emptied, emptied: null } : { protoOpen: false, emptied: st.queue, queue: [] }),
+      offlineLabel: st.offline ? '✓ Offline (tap to reconnect)' : 'Go offline',
+      toggleOffline: () => { this.setState({ protoOpen: false, offline: !st.offline, done: st.offline ? st.done.map((d) => Object.assign({}, d, { pending: false })) : st.done }); if (st.offline) this.toast('Back online. Pickups uploaded.'); },
+      printerDown: st.printerDown, printerLabel: st.printerDown ? '✓ Printer offline' : 'Printer offline',
+      togglePrinter: () => this.setState({ protoOpen: false, printerDown: !st.printerDown }),
+      partial: st.partial, partialLabel: st.partial ? '✓ Partial pickup on' : 'Partial pickup off',
+      togglePartial: () => this.setState({ protoOpen: false, partial: !st.partial }),
+      tabC: (st.protoTab || 'controls') === 'controls', tabK: st.protoTab === 'checkpoints', tabE: st.protoTab === 'errors', tabECls: st.protoTab === 'errors' ? 'on' : '', toErrors: () => this.setState({ protoTab: 'errors' }),
+      tabCCls: (st.protoTab || 'controls') === 'controls' ? 'on' : '', tabKCls: st.protoTab === 'checkpoints' ? 'on' : '',
+      toControls: () => this.setState({ protoTab: 'controls' }), toCheckpoints: () => this.setState({ protoTab: 'checkpoints' }),
+      cps: [
+        ['queue', '1 · Queue: up next waiting', 'The starting point: Emily is up next, 7 checked in, including guest Dana Reyes (A111).'],
+        ['serve', '2 · Serving: pull packages', 'Just claimed Emily Chen (A105); nothing scanned yet.'],
+        ['scan', '3 · Scanning packages', 'Camera open with 1 of 3 packages scanned.'],
+        ['confirm', '4 · Confirm it’s them', 'All packages scanned; the ID step is current.'],
+        ['sign', '5 · Signature', 'The signature pad is open for Emily.'],
+        ['ready', '6 · Ready to complete', 'Packages and ID done; Complete pickup is enabled.'],
+        ['done', '7 · Just completed', 'Plays the completion beat and the Undo toast.'],
+        ['proxy', '8 · Proxy pickup', 'Serving Alex Park, picking up for Kevin O’Brien and Mei Lin.'],
+        ['move', '9 · Move to a window', 'The Move sheet is open for the Up next student.'],
+        ['release', '10 · Put back & release', 'Serving Emily with 2 of 3 pulled; the Put back & release sheet is open.'],
+        ['checkin', '11 · Walk-up check-in', 'The Check in sheet is open.'],
+        ['guest', '12 · Guest pickup', 'Serving guest Dana Reyes (A111); no student added yet. Tap Find a student and search Nin to add Nina Patel.']
+      ].map(([k, label, tip]) => ({ label, tip, go: () => this.jump(k) })),
+      errs: [
+        ['e_offline', 'E1 · Offline', 'Queue with the You’re offline banner; serving new students is blocked.'],
+        ['e_noid', 'E2 · ID not found', 'Type their student ID sheet with a number that matches no one.'],
+        ['e_busy', 'E3 · Serve while serving', 'Queue while serving Emily; Serve or Scan ID is tapped: her card pulses with Finish or release A105 first.'],
+        ['e_wrong', 'E4 · Another student’s package', 'Serving Emily; the camera shows Marcus Lee’s package alert.'],
+        ['e_unknown', 'E5 · Label not in the system', 'Serving Emily; the camera shows the Label not found alert.'],
+        ['e_dup', 'E6 · Package already scanned', 'Serving Emily; the first package is scanned again.'],
+        ['e_inline', 'E7 · Already in line', 'Check in sheet, searching Priya: Priya Shah can check in; Priya Raman is tagged In line.'],
+        ['e_guest', 'E8 · Guest can’t pick up', 'Serving guest Dana; Find a student searching Mei: Mei Tanaka hasn’t added Dana, so the blocked note shows.']
+      ].map(([k, label, tip]) => ({ label, tip, go: () => this.jump(k) })),
+      reset: () => { this._strokes = []; clearTimeout(this._toastT); this.blurActive(); this.setState(Object.assign(this.initial(), { now: Date.now() })); }
+    };
+
+    return {
+      refs: { step1: (el) => { this._step1 = el; }, queueMain: (el) => { this._queueMain = el; }, serveMain: (el) => { this._serveMain = el; }, step2: (el) => { this._step2 = el; } },
+      zoom: { open: !!st.zoom, src: st.zoom && st.zoom.src, name: st.zoom && st.zoom.name, sid: st.zoom && st.zoom.sid, close: () => this.setState({ zoom: null }) },
+      cs, mv, ic, chrome, m: metrics, up, list, serving, done, qTabs, inTabs, mine, cam, sig, rel, ty, toast, proto, kb,
+      f: {
+        home: st.view === 'home', inbound: st.view === 'inbound', inbox: st.inTab === 'inbox', pickup: st.inTab === 'pickup',
+        offline: st.offline, resume: !!m && !isServe, pulseCls: st.pulseOn ? 'pulse-a' : '', pulseZ: st.pulseOn && !isServe ? '61' : 'auto', spotlight: !!st.pulseOn && !isServe && !!m, upNext: !!upNext, overview: !searchFocus,
+        searchFocus, showSort: !searchFocus && st.qTab === 'queue',
+        tabQueue: st.qTab === 'queue', tabServing: st.qTab === 'serving', tabDone: st.qTab === 'done',
+        bar: !isServe, serve: isServe, cam: isCam, sign: isSign
+      },
+      print: {
+        // The printer comes from the operator's settings; no picker in the flow.
+        go: () => this.sendPickList(this.state.printer || 'Back office'),
+        title: st.printJob && st.printJob.kind === 'receipt' ? 'Send receipt to' : 'Send pick list to',
+        printers: ['Back office', 'Window 1', 'Window 2'].map((n, i) => ({ label: n, trailing: st.printer === n ? 'Last used' : '', divider: i < 2, pick: () => (this.state.printJob && this.state.printJob.kind === 'receipt' ? this.sendReceipt(n, this.state.printJob.rec) : this.sendPickList(n)) }))
+      },
+      guest, sh: { guest: st.sheet === 'guest', printer: st.sheet === 'printer', busy: st.sheet === 'busy' && !!st.busy && !!m, sort: st.sheet === 'sort', checkin: st.sheet === 'checkin', skip: st.sheet === 'skip', release: st.sheet === 'release', type: st.sheet === 'type', claimed: st.sheet === 'claimed' },
+      busy: (st.busy && m) ? {
+        cur: m.s.t, curName: m.s.name, curFirst: m.s.name.split(' ')[0],
+        who: st.busy.s.t + ' · ' + st.busy.s.name, name: st.busy.s.name, first: st.busy.s.name.split(' ')[0],
+        ini: this.ini(st.busy.s.name), photo: photo(st.busy.s.name), pk: this.pkCount(st.busy.s.pk.length),
+        go: () => { const b = this.state.busy, cur = this.state.mine; this.setState({ queue: this.state.queue.concat([cur.s0 || cur.s]), mine: null, sheet: null }); setTimeout(() => this.startScanned(b), 0); }
+      } : {},
+      claim: { by: st.claim && st.claim.by, who: st.claim && st.claim.who, noNext: !oldest || st.offline, next: () => { this.setState({ sheet: null }); if (oldest) this.serve(oldest); } },
+      ci: { q: st.ciQ, set: (v) => this.setState({ ciQ: v }),
+        addon: (window.React && U.Button ? window.React.createElement(U.Button, { color: 'secondary', size: 'lg', iconLeading: ic.Scan, onPress: () => { this.kbClose(); this.setState({ sheet: null, screen: 'cam', camMode: 'checkinId', camAlert: null, camFlash: null }); } }, 'Scan ID') : null), rows: ciRows, has: ciRows.length > 0, none: ciRows.length === 0 },
+      skip: { note: st.skipNote, empty: !st.skipNote.trim(), set: (v) => this.setState({ skipNote: v }), confirm: () => { this.kbClose(); this.setState({ sheet: null, mine: Object.assign({}, m, { sig: { skipped: true, note: st.skipNote.trim() } }), skipNote: '' }); } },
+      search: {
+        q: st.q, hasQ: !!st.q, label: 'Search',
+        pos: searchFocus ? 'absolute' : 'static', z: searchFocus ? '77' : 'auto', pad: searchFocus ? '8px 16px' : '0', rowBg: searchFocus ? 'var(--color-bg-primary)' : 'transparent', rowShadow: searchFocus ? '0 -1px 0 rgba(10, 13, 18, 0.06)' : 'none',
+        bg: searchFocus ? 'var(--color-bg-primary)' : 'rgba(118, 118, 128, 0.12)', ring: searchFocus ? '0 0 0 2px var(--color-border-brand)' : 'none',
+        onInput: (e) => this.setState({ q: e && e.target ? e.target.value : e }),
+        clear: () => this.setState({ q: '' }),
+        set: (v) => this.setState({ q: v }),
+        addon: searchFocus ? null : (window.React && U.Button ? window.React.createElement(U.Button, { color: 'secondary', size: 'lg', iconLeading: ic.Scan, onPress: () => { this.kbClose(); if (this.state.mine) { this.serve(); return; } this.setState({ screen: 'cam', camMode: 'serveId', camAlert: null, camFlash: null }); } }, 'Scan ID') : null),
+        cancel: () => { this.setState({ q: '' }); this.kbClose(); }
+      },
+      sort: {
+        label: st.sort === 'newest' ? 'Newest first' : 'Oldest first',
+        open: () => { this.kbClose(); this.setState({ sheet: 'sort' }); },
+        oldest: () => this.setState({ sort: 'oldest', sheet: null }), newest: () => this.setState({ sort: 'newest', sheet: null }),
+        oldTrail: st.sort === 'oldest' ? 'Selected' : '', newTrail: st.sort === 'newest' ? 'Selected' : ''
+      },
+      homeIn: [
+        { label: 'New items received', n: 13, icon: ic.PackageCheck, rule: rule(0) },
+        { label: 'Waiting for operator pickup', n: 26, icon: ic.Inbox01, rule: rule(1) },
+        { label: 'Items to be delivered', n: 5, icon: ic.Truck01, rule: rule(2) },
+        { label: 'Service Center pickups', n: 5, icon: ic.Users01, rule: rule(3) }
+      ],
+      bar: { home: barItem('home', true), inbound: barItem('inbound', true), outbound: barItem('outbound', false), routes: barItem('routes', false) },
+      endSpot: () => { clearTimeout(this._spotT); this.setState({ spotStep: null }); },
+      tryComplete: () => {
+        const mm = this.state.mine; if (!mm) return;
+        const tot = mm.s.pk.length, got = mm.scanned.length;
+        const pkOk = this.state.partial ? got > 0 : got === tot;
+        const idOk = !!(mm.idAt || mm.sig);
+        if (pkOk && idOk) { this.complete(); return; }
+        const stepN = pkOk ? 2 : 1;
+        const el = stepN === 1 ? this._step1 : this._step2, main = this._serveMain;
+        if (el && main) { try { const mr = main.getBoundingClientRect(), er = el.getBoundingClientRect(); const k = main.clientHeight / (mr.height || 1); main.scrollTo({ top: main.scrollTop + (er.top - mr.top) * k - 16, behavior: 'smooth' }); } catch (e) {} }
+        clearTimeout(this._spotT);
+        this.setState({ spotStep: stepN });
+        this._spotT = setTimeout(() => this.setState({ spotStep: null }), 3000);
+        this.toast(stepN === 1 ? (this.state.partial ? 'Scan at least one package first' : 'Scan all ' + tot + ' packages first') : 'Scan their ID or get a signature first', 'warning');
+      },
+      endPulse: () => { clearTimeout(this._pulseT); this.setState({ pulseOn: false }); },
+      dead: () => this.dead(),
+      openQueue: () => this.setState({ view: 'inbound', inTab: 'pickup', qTab: 'queue' }),
+      serveNext: () => { const o = this.oldest(); if (o) this.serve(o); },
+      resume: () => { this.kbClose(); this.setState({ screen: 'serve' }); },
+      backToQueue: () => this.setState({ screen: null, view: 'inbound', inTab: 'pickup' }),
+      openCheckIn: () => { this.kbClose(); this.setState({ sheet: 'checkin', ciQ: st.q }); },
+      closeSheet: () => {
+        this.kbClose();
+        const b = st.sheet === 'busy' ? st.busy : null;
+        if (b && b.kind === 'new') { this.setState({ ready: st.ready.filter((x) => x !== b.ready), queue: st.queue.concat([b.s]), nextNum: st.nextNum + 1 }); this.toast(b.s.t + ' · ' + b.s.name + ' checked in', 'neutral'); }
+        this.setState({ sheet: null, busy: null, relOk: false, skipNote: '' });
+      },
+      announce: () => { this.setState({ annUntil: Date.now() + 8000 }); clearTimeout(this._annT); this._annT = setTimeout(() => this.setState({ now: Date.now() }), 8100); this.toast('Calling ' + m.s.t + ' to see John', 'neutral'); },
+      scanId: () => this.setState({ screen: 'cam', camMode: 'id', camAlert: null, camFlash: null }),
+      scanItems: () => this.setState({ screen: 'cam', camMode: 'items', camAlert: null, camFlash: null }),
+      closeCam: () => this.setState(st.camMode === 'checkinId' ? { screen: null, sheet: 'checkin', camMode: null, camAlert: null, camFlash: null, protoOpen: false } : { screen: st.camMode === 'serveId' ? (m ? 'serve' : null) : 'serve', camMode: null, camOpen: false, camAlert: null, camFlash: null, protoOpen: false }),
+      clearCamAlert: () => this.setState({ camAlert: null }),
+      openType: () => this.setState({ sheet: 'type', typeQ: '', typeBad: false }),
+      closeType: () => { this.kbClose(); this.setState({ sheet: this.state.typeFor === '__idCheckin' ? 'checkin' : null, typeQ: '', typeBad: false, typeFor: null }); },
+      openSign: () => { this._strokes = []; this.setState({ screen: 'sign', sigD: '' }); },
+      closeSign: () => this.setState({ screen: 'serve' }),
+      openSkip: () => this.setState({ sheet: 'skip', skipNote: '' }),
+      undoSkip: () => this.setState({ mine: Object.assign({}, m, { sig: null }) }),
+      openRelease: () => this.setState({ sheet: 'release', relOk: false }),
+      complete: () => this.complete()
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -200,21 +200,12 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
         </sc-if>
 
         <sc-if value="{{f.overview}}" hint-placeholder-val="{{true}}">
-          <!-- stats -->
-          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 4px 4px 0">
-            <div style="display: flex; flex-direction: column">
-              <span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">In queue</span>
-              <span style="font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-primary)">{{m.inQueue}}</span>
+          <!-- Where this operator is serving (shared rules): text link in place of the stats row. Live dot (same as the web) while serving; lock instead of chevron while serving a student. -->
+          <sc-if value="{{where.has}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; align-items: center; margin: -6px 0 -6px -12px">
+              <div style="position: relative; display: flex"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="md" icon-leading="{{where.icon}}" icon-trailing="{{where.trail}}" aria-haspopup="dialog" aria-label="{{where.aria}}" on-press="{{where.open}}">{{where.label}}</x-import><span class="live-dot" aria-hidden="true" style="position: absolute; top: 9px; left: 23px; width: 8px; height: 8px; border-radius: 9999px; background: #17B26A; box-shadow: 0 0 0 2px #FFFFFF; pointer-events: none"></span></div>
             </div>
-            <div style="display: flex; flex-direction: column">
-              <span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Longest wait</span>
-              <span style="font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-primary)">{{m.longest}}</span>
-            </div>
-            <div style="display: flex; flex-direction: column">
-              <span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Served today</span>
-              <span style="font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-text-primary); white-space: nowrap"><span class="{{m.tickCls}}">{{m.served}}</span><sc-if value="{{m.hasByMe}}" hint-placeholder-val="{{true}}"><span class="{{m.byMeCls}}" style="margin-left: 6px; font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--color-text-tertiary)">· {{m.byMe}} by you</span></sc-if></span>
-            </div>
-          </div>
+          </sc-if>
 
           <!-- you're serving -->
           <sc-if value="{{f.resume}}" hint-placeholder-val="{{false}}">
@@ -242,6 +233,17 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
             </div>
           </sc-if>
 
+          <!-- Nothing chosen yet (every sign-in, like the web): this card takes Up next's place. -->
+          <sc-if value="{{where.none}}" hint-placeholder-val="{{false}}">
+            <section aria-label="Choose where you're serving" style="flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 16px; border-radius: 12px; border: 2px dashed var(--color-border-primary); background: var(--color-bg-primary); text-align: center">
+              <x-import component-from-global-scope="UntitledUI.FeaturedIcon" icon="{{ic.Monitor01}}" color="gray" theme="light" size="md"></x-import>
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="font-size: 17px; line-height: 24px; font-weight: 600; color: var(--color-text-primary)">Choose where you’re serving</div>
+                <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Pick a window, or serve on foot, to start calling students.</div>
+              </div>
+              <div class="fullw" style="width: 100%"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" on-press="{{where.open}}">Choose</x-import></div>
+            </section>
+          </sc-if>
           <!-- up next -->
           <sc-if value="{{f.upNext}}" hint-placeholder-val="{{true}}">
             <section aria-label="Up next" class="{{m.upCls}}" style="position: relative; flex-shrink: 0; display: flex; border-radius: 12px; overflow: hidden; background: var(--color-bg-primary); box-shadow: 0 0 0 1px var(--color-border-secondary)">
@@ -469,7 +471,7 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
             <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{mine.mail}}</div>
             </sc-if>
             <sc-if value="{{mine.guest}}" hint-placeholder-val="{{false}}"><div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Check a photo ID</div></sc-if>
-            <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Lobby TV: {{mine.t}} · See John</div>
+            <div style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Lobby TV: {{mine.t}} · {{where.tv}}</div>
             <div style="display: flex; padding-top: 4px"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Announcement02}}" is-disabled="{{mine.annBusy}}" on-press="{{announce}}" style="margin-left: -12px">{{mine.annLabel}}</x-import></div>
           </div>
         </section>
@@ -697,12 +699,13 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
           <div aria-hidden="true" style="position: absolute; left: 20px; right: 20px; bottom: 48px; border-top: 1px dashed var(--color-border-primary)"></div>
           <div aria-hidden="true" style="position: absolute; left: 20px; bottom: 22px; font-size: 13px; line-height: 18px; color: var(--color-text-quaternary)">Sign above the line</div>
         </div>
-        <!-- Done sits right under the pad (the phone is in the student's hands); Clear below it. -->
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px">
-          <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="xl" is-disabled="{{sig.empty}}" on-press="{{sig.done}}" style="width: 100%">Done</x-import></div>
-          <div style="display: flex; justify-content: center"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" is-disabled="{{sig.empty}}" on-press="{{sig.clear}}">Clear signature</x-import></div>
-        </div>
+        <!-- Clear sits right under the pad it clears. -->
+        <div style="display: flex; justify-content: flex-end; margin-top: -8px"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.RefreshCcw01}}" is-disabled="{{sig.empty}}" on-press="{{sig.clear}}" style="margin-right: -12px">Clear signature</x-import></div>
       </main>
+      <!-- Sticky footer, same as the Serve screen -->
+      <footer style="flex: 0 0 auto; position: relative; z-index: 2; padding: 12px 16px 34px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 -1px 0 rgba(10, 13, 18, 0.06)">
+        <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{sig.empty}}" on-press="{{sig.done}}">Done</x-import></div>
+      </footer>
     </div>
   </sc-if>
 
@@ -759,6 +762,31 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
             <div style="padding: 16px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">No one with packages ready matches “{{ci.q}}”.</div>
           </sc-if>
           </sc-if>
+        </div>
+      </x-import>
+    </div>
+  </sc-if>
+
+  <!-- Where are you serving? (same rows as Move to a window; On foot first) -->
+  <sc-if value="{{sh.where}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 50">
+      <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Where are you serving?" on-close="{{closeSheet}}">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
+          <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">Students are called to where you are. The lobby TV updates right away.</div>
+          <div role="radiogroup" aria-label="Where you're serving" style="display: flex; flex-direction: column; gap: 8px">
+            <sc-for list="{{where.rows}}" as="w" hint-placeholder-count="6">
+              <button type="button" role="radio" aria-checked="{{w.on}}" disabled="{{w.inUse}}" onClick="{{w.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px; box-sizing: border-box; border-radius: 10px; border: 0; background: {{w.bg}}; box-shadow: {{w.ring}}; opacity: {{w.op}}; font: inherit; text-align: left; cursor: {{w.cursor}}">
+                <span style="display: flex; color: var(--color-fg-quaternary)"><sc-if value="{{w.foot}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.Phone01" class="size-5" aria-hidden="true"></x-import></sc-if><sc-if value="{{w.win}}" hint-placeholder-val="{{true}}"><x-import component-from-global-scope="UntitledUI.Icons.Monitor01" class="size-5" aria-hidden="true"></x-import></sc-if></span>
+                <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{w.name}}</span><sc-if value="{{w.foot}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">Walking around helping people, not at a window</span></sc-if></span>
+                <sc-if value="{{w.win}}" hint-placeholder-val="{{true}}"><span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: {{w.dot}}"></span>{{w.status}}</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="primary" size="lg" is-disabled="{{where.noPick}}" on-press="{{where.go}}">{{where.goLabel}}</x-import></div>
+            <sc-if value="{{where.has}}" hint-placeholder-val="{{true}}"><div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" icon-leading="{{ic.LogOut01}}" on-press="{{where.stop}}">Stop serving</x-import></div></sc-if>
+            <sc-if value="{{where.none}}" hint-placeholder-val="{{false}}"><div class="fullw" style="width: 100%;"><x-import component-from-global-scope="UntitledUI.Button" class="w-full" color="secondary" size="lg" on-press="{{closeSheet}}">Cancel</x-import></div></sc-if>
+          </div>
         </div>
       </x-import>
     </div>
@@ -873,7 +901,7 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
           <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{mv.name}} will be called to the window you pick. The lobby TV updates right away.</div>
           <div role="radiogroup" aria-label="Window" style="display: flex; flex-direction: column; gap: 8px">
             <sc-for list="{{mv.wins}}" as="w" hint-placeholder-count="3">
-              <button type="button" role="radio" aria-checked="{{w.on}}" onClick="{{w.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; border-radius: 10px; border: 0; background: {{w.bg}}; box-shadow: {{w.ring}}; font: inherit; text-align: left; cursor: pointer">
+              <button type="button" role="radio" aria-checked="{{w.on}}" disabled="{{w.mineW}}" onClick="{{w.pick}}" style="opacity: {{w.op}}; cursor: {{w.cursor}}; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; border-radius: 10px; border: 0; background: {{w.bg}}; box-shadow: {{w.ring}}; font: inherit; text-align: left; cursor: pointer">
                 <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Monitor01" class="size-5" aria-hidden="true"></x-import></span>
                 <span style="flex: 1 1 auto; font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{w.name}}</span>
                 <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: {{w.dot}}"></span>{{w.status}}</span>
@@ -1129,7 +1157,7 @@ class Component extends DCLogic {
         { name: 'Fatima Noor', sid: '2041-560', mail: 'Mail code MH-222', pk: [P('f1', 'UPS', '1Z9A01X20388761123', 'Small box', 'C', 'C3')] },
         { name: 'Priya Shah', sid: '2043-118', mail: 'Mail code HH-310', pk: [P('ps1', 'USPS', '9400111899220099887766', 'Padded mailer', 'A', 'A9')] }
       ],
-      nextNum: 112, gq: '', baseServed: 34,
+      nextNum: 112, gq: '', where: null, whereDraft: null, baseServed: 34,
       mine: null, screen: null, camMode: null, camAlert: null, camFlash: null,
       sheet: null, claim: null, busy: null, ciQ: '', ciMode: 'student', ciFirst: '', ciLast: '', skipNote: '', relOk: false, typeQ: '', typeBad: false,
       sigD: '', toast: null, offline: false, partial: true, race: false, emptied: null,
@@ -1228,6 +1256,7 @@ class Component extends DCLogic {
   serve(s) {
     const st = this.state;
     if (st.offline) { this.toast('You’re offline. Reconnect to serve.', 'warning'); return; }
+    if (!st.where) { this.kbClose(); this.setState({ sheet: 'where', whereDraft: null }); this.toast('Choose where you’re serving first', 'warning'); return; }
     if (st.mine) { clearTimeout(this._pulseT); try { this._queueMain && this._queueMain.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} this.setState({ pulseOn: true }); this._pulseT = setTimeout(() => this.setState({ pulseOn: false }), 3000); this.toast('Finish or release ' + st.mine.s.t + ' first', 'warning'); return; }
     this.kbClose();
     const queue = st.queue.filter((x) => x.t !== s.t);
@@ -1243,6 +1272,7 @@ class Component extends DCLogic {
     const st = this.state;
     const close = { screen: st.mine ? 'serve' : null, camMode: null, camAlert: null, camFlash: null, protoOpen: false };
     if (st.offline) { this.setState(Object.assign({}, close, { screen: null })); this.toast('You’re offline. Reconnect to serve.', 'warning'); return; }
+    if (!st.where && !st.mine) { this.setState(Object.assign({}, close, { screen: null, sheet: 'where', whereDraft: null })); this.toast('Choose where you’re serving first', 'warning'); return; }
     let p = null;
     if (kind === 'line') {
       const s = st.queue.find((x) => x.name === 'Priya Raman') || st.queue.slice().sort((a, b) => b.wait - a.wait)[1] || st.queue[0];
@@ -1354,7 +1384,7 @@ class Component extends DCLogic {
   // Prototype only: Simulate › Checkpoints. Each one starts from a clean reset, then sets up that moment in the flow.
   jump(k) {
     this._strokes = []; clearTimeout(this._toastT); clearTimeout(this._pickT); clearTimeout(this._doneT); this.blurActive && this.blurActive(); this.kbClose && this.kbClose();
-    const base = Object.assign(this.initial(), { now: Date.now(), protoOpen: false, protoTab: k.indexOf('e_') === 0 ? 'errors' : 'checkpoints', view: 'inbound', inTab: 'pickup', qTab: 'queue' });
+    const base = Object.assign(this.initial(), { now: Date.now(), protoOpen: false, protoTab: k.indexOf('e_') === 0 ? 'errors' : 'checkpoints', where: k === 'queue' ? null : 'foot', view: 'inbound', inTab: 'pickup', qTab: 'queue' });
     const take = (t) => base.queue.find((x) => x.t === t);
     const serving = (t, extra) => { const s = take(t); return Object.assign(base, { queue: base.queue.filter((x) => x.t !== t), screen: 'serve', mine: Object.assign({ s, s0: s, startedAt: Date.now() - 95000, idAt: null, scanned: [], sig: null }, extra || {}) }); };
     const all = (t) => take(t).pk.map((p) => p.id);
@@ -1493,8 +1523,26 @@ class Component extends DCLogic {
     }));
     const done = { rows: doneF, has: doneF.length > 0, none: doneF.length === 0, heading: q ? 'Searching all windows and dates' : 'Completed today · latest first', noneText: q ? 'No completed pickup matches “' + st.q + '”' : 'Pickups show up here once they’re complete.' };
 
-    // ---- move to a window (web: Move to another window). Phone operators have no window of their own.
-    const WINS = ['Window 1', 'Window 2', 'Window 3', 'Window 4'];
+    // ---- where this operator is serving (shared rules): a window like the web, or on foot. Locked while serving anyone.
+    const onFoot = st.where === 'foot', wDraft = st.whereDraft;
+    const winBusy = (w) => st.others.some((o) => (o.by || '').indexOf(w) >= 0);
+    const where = {
+      has: !!st.where, none: !st.where, label: onFoot ? 'Serving on foot' : 'Serving at ' + st.where,
+      aria: (onFoot ? 'Serving on foot' : 'Serving at ' + st.where) + (m ? '. Locked while serving' : '. Change where you’re serving'),
+      icon: onFoot ? ic.Phone01 : ic.Monitor01, trail: m ? ic.Lock01 : ic.ChevronDown,
+      tv: onFoot || !st.where ? 'See John' : st.where,
+      open: () => { if (this.state.mine) { this.toast('Finish or release ' + this.state.mine.s.t + ' first', 'warning'); return; } this.kbClose(); this.setState({ sheet: 'where', whereDraft: this.state.where }); },
+      rows: [{ k: 'foot', name: 'On foot' }].concat(['Window 1', 'Window 2', 'Window 3', 'Window 4', 'Window 5'].map((w) => ({ k: w, name: w }))).map((r) => {
+        const foot = r.k === 'foot', inUse = !foot && winBusy(r.k), on = wDraft === r.k;
+        return { name: r.name, foot, win: !foot, inUse, on, status: inUse ? 'In use' : 'Available', dot: inUse ? 'var(--color-fg-quaternary)' : 'var(--color-fg-success-secondary)', op: inUse ? '0.5' : '1', cursor: inUse ? 'not-allowed' : 'pointer', bg: on ? 'var(--color-bg-brand-primary)' : 'var(--color-bg-primary)', ring: on ? 'inset 0 0 0 2px var(--color-brand-600)' : 'inset 0 0 0 1px var(--color-border-secondary)', pick: () => { if (!inUse) this.setState({ whereDraft: r.k }); } };
+      }),
+      noPick: !wDraft || wDraft === st.where, goLabel: 'Serve here',
+      go: () => { const d = this.state.whereDraft; if (!d) return; this.setState({ where: d, whereDraft: null, sheet: null }); this.toast(d === 'foot' ? 'Serving on foot' : 'Serving at ' + d); },
+      stop: () => { this.setState({ where: null, whereDraft: null, sheet: null }); this.toast('You stopped serving', 'neutral'); }
+    };
+
+    // ---- move a student to a window (web: Move to another window). Separate from where this operator serves.
+    const WINS = ['Window 1', 'Window 2', 'Window 3', 'Window 4', 'Window 5'];
     const mvStu = st.moveFor === 'mine' ? (m ? m.s : null) : st.moveFor === 'up' ? upNext : null;
     const mvPulled = st.moveFor === 'mine' && m ? m.scanned.length : 0;
     const doMove = () => {
@@ -1522,8 +1570,8 @@ class Component extends DCLogic {
       hasNote: mvPulled > 0, note: 'Bring the ' + this.pkCount(mvPulled) + ' you pulled to ' + (st.moveTo || 'that window') + '. The pickup starts fresh there.',
       wins: WINS.map((w) => {
         const at = st.others.filter((o) => (o.by || '').indexOf(w) >= 0);
-        const on = st.moveTo === w;
-        return { name: w, on, status: at.length ? 'Serving ' + at.map((o) => o.t).join(', ') : 'Available', dot: at.length ? 'var(--color-fg-warning-secondary)' : 'var(--color-fg-success-secondary)', bg: on ? 'var(--color-bg-brand-primary)' : 'var(--color-bg-primary)', ring: on ? 'inset 0 0 0 2px var(--color-brand-600)' : 'inset 0 0 0 1px var(--color-border-secondary)', pick: () => this.setState({ moveTo: w }) };
+        const mineW = st.where === w, on = !mineW && st.moveTo === w;
+        return { name: w, on, mineW, op: mineW ? '0.5' : '1', cursor: mineW ? 'not-allowed' : 'pointer', status: mineW ? 'You' : at.length ? 'Serving ' + at.map((o) => o.t).join(', ') : 'Available', dot: mineW ? 'var(--color-fg-brand-secondary)' : at.length ? 'var(--color-fg-warning-secondary)' : 'var(--color-fg-success-secondary)', bg: on ? 'var(--color-bg-brand-primary)' : 'var(--color-bg-primary)', ring: on ? 'inset 0 0 0 2px var(--color-brand-600)' : 'inset 0 0 0 1px var(--color-border-secondary)', pick: () => { if (!mineW) this.setState({ moveTo: w }); } };
       })
     };
 
@@ -1897,7 +1945,7 @@ class Component extends DCLogic {
       tabCCls: (st.protoTab || 'controls') === 'controls' ? 'on' : '', tabKCls: st.protoTab === 'checkpoints' ? 'on' : '',
       toControls: () => this.setState({ protoTab: 'controls' }), toCheckpoints: () => this.setState({ protoTab: 'checkpoints' }),
       cps: [
-        ['queue', '1 · Queue: up next waiting', 'The starting point: Emily is up next, 7 checked in, including guest Dana Reyes (A111).'],
+        ['queue', '1 · Start of shift', 'Nothing chosen yet: Choose where you’re serving replaces Up next. 7 checked in, including guest Dana Reyes (A111). Other checkpoints start on foot.'],
         ['serve', '2 · Serving: pull packages', 'Just claimed Emily Chen (A105); nothing scanned yet.'],
         ['scan', '3 · Scanning packages', 'Camera open with 1 of 3 packages scanned.'],
         ['confirm', '4 · Confirm it’s them', 'All packages scanned; the ID step is current.'],
@@ -1929,7 +1977,7 @@ class Component extends DCLogic {
       cs, mv, ic, chrome, m: metrics, up, list, serving, done, qTabs, inTabs, mine, cam, sig, rel, ty, toast, proto, kb,
       f: {
         home: st.view === 'home', inbound: st.view === 'inbound', inbox: st.inTab === 'inbox', pickup: st.inTab === 'pickup',
-        offline: st.offline, resume: !!m && !isServe, pulseCls: st.pulseOn ? 'pulse-a' : '', pulseZ: st.pulseOn && !isServe ? '61' : 'auto', spotlight: !!st.pulseOn && !isServe && !!m, upNext: !!upNext, overview: !searchFocus,
+        offline: st.offline, resume: !!m && !isServe, pulseCls: st.pulseOn ? 'pulse-a' : '', pulseZ: st.pulseOn && !isServe ? '61' : 'auto', spotlight: !!st.pulseOn && !isServe && !!m, upNext: !!upNext && !!st.where, overview: !searchFocus,
         searchFocus, showSort: !searchFocus && st.qTab === 'queue',
         tabQueue: st.qTab === 'queue', tabServing: st.qTab === 'serving', tabDone: st.qTab === 'done',
         bar: !isServe, serve: isServe, cam: isCam, sign: isSign
@@ -1940,7 +1988,7 @@ class Component extends DCLogic {
         title: st.printJob && st.printJob.kind === 'receipt' ? 'Send receipt to' : 'Send pick list to',
         printers: ['Back office', 'Window 1', 'Window 2'].map((n, i) => ({ label: n, trailing: st.printer === n ? 'Last used' : '', divider: i < 2, pick: () => (this.state.printJob && this.state.printJob.kind === 'receipt' ? this.sendReceipt(n, this.state.printJob.rec) : this.sendPickList(n)) }))
       },
-      guest, sh: { guest: st.sheet === 'guest', printer: st.sheet === 'printer', busy: st.sheet === 'busy' && !!st.busy && !!m, sort: st.sheet === 'sort', checkin: st.sheet === 'checkin', skip: st.sheet === 'skip', release: st.sheet === 'release', type: st.sheet === 'type', claimed: st.sheet === 'claimed' },
+      where, guest, sh: { where: st.sheet === 'where', guest: st.sheet === 'guest', printer: st.sheet === 'printer', busy: st.sheet === 'busy' && !!st.busy && !!m, sort: st.sheet === 'sort', checkin: st.sheet === 'checkin', skip: st.sheet === 'skip', release: st.sheet === 'release', type: st.sheet === 'type', claimed: st.sheet === 'claimed' },
       busy: (st.busy && m) ? {
         cur: m.s.t, curName: m.s.name, curFirst: m.s.name.split(' ')[0],
         who: st.busy.s.t + ' · ' + st.busy.s.name, name: st.busy.s.name, first: st.busy.s.name.split(' ')[0],

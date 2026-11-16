@@ -15,6 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
+/* Open-row lists (mobile rule): a 1pt rule between rows, no boxes. */
+.mrow+.mrow,[role=radiogroup]>button+button{border-top:1px solid var(--color-border-secondary) !important}
+
 body{margin:0}
 html:root{--color-brand-25:#f6fafb;--color-brand-50:#eef5f7;--color-brand-100:#d9e9ed;--color-brand-200:#b7d3db;--color-brand-300:#8bb6c2;--color-brand-400:#5d93a2;--color-brand-500:#437886;--color-brand-600:#35626e;--color-brand-700:#2f525c;--color-brand-800:#2b454d;--color-brand-900:#263b42;--color-brand-950:#15252a}
 a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-secondary_hover)}
@@ -499,10 +502,10 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
             <h2 style="flex: 1 1 auto; margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; color: {{mine.k1title}}">Pull packages</h2>
             <span style="font-size: 13px; line-height: 20px; font-variant-numeric: tabular-nums; color: var(--color-text-tertiary)">{{mine.scanCount}}</span>
           </div>
-          <div class="stepfull" style="display: flex; flex-direction: column">
+          <div class="stepfull" style="display: flex; flex-direction: column; margin: 4px -16px 0">
             <sc-for list="{{mine.items}}" as="it" hint-placeholder-count="3">
-              <sc-if value="{{it.grpOn}}" hint-placeholder-val="{{false}}"><div style="margin-top: {{it.mt}}; padding: 0 4px 0 12px; min-height: 36px; display: flex; align-items: center; background: var(--color-bg-secondary); border: 1px solid var(--color-border-secondary); border-radius: 12px 12px 0 0"><span role="heading" aria-level="3" style="flex: 1 1 auto; padding: 8px 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary)">{{it.grpLabel}}</span><sc-if value="{{it.grpRm}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Trash01}}" aria-label="{{it.grpRmLabel}}" on-press="{{it.grpRemove}}"></x-import></sc-if></div></sc-if>
-              <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 8px; margin-top: {{it.rmt}}; border: 1px solid var(--color-border-secondary); border-top: {{it.rTop}}; border-radius: {{it.rRad}}">
+              <sc-if value="{{it.grpOn}}" hint-placeholder-val="{{false}}"><div style="margin-top: {{it.mt}}; padding: 0 4px 0 16px; min-height: 36px; display: flex; align-items: center; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border-secondary); border-bottom: 1px solid var(--color-border-secondary)"><span role="heading" aria-level="3" style="flex: 1 1 auto; padding: 8px 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--color-text-secondary)">{{it.grpLabel}}</span><sc-if value="{{it.grpRm}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Button" color="tertiary" size="lg" icon-leading="{{ic.Trash01}}" aria-label="{{it.grpRmLabel}}" on-press="{{it.grpRemove}}"></x-import></sc-if></div></sc-if>
+              <div style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 8px; border-top: {{it.rTop}}">
                 <span style="width: 32px; flex: 0 0 32px; display: flex; justify-content: center; color: {{it.fg}}"><sc-if value="{{it.got}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.CheckCircle" class="size-6" aria-hidden="true"></x-import></sc-if><sc-if value="{{it.todo}}" hint-placeholder-val="{{true}}"><x-import component-from-global-scope="UntitledUI.Icons.Package" class="size-6" aria-hidden="true"></x-import></sc-if></span>
                 <div style="flex: 1 1 auto; min-width: 0">
                   <div style="font-size: 15px; line-height: 22px; font-weight: 600; color: {{it.locFg}}">{{it.loc}}</div>
@@ -861,9 +864,9 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
         <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
           <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{rel.text}}</div>
           <sc-if value="{{rel.needsPutBack}}" hint-placeholder-val="{{true}}">
-            <div style="display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; background: var(--color-bg-secondary)">
+            <div style="display: flex; flex-direction: column; margin: 0 -20px; border-top: 1px solid var(--color-border-secondary); border-bottom: 1px solid var(--color-border-secondary)">
               <sc-for list="{{rel.items}}" as="it" hint-placeholder-count="2">
-                <div style="font-size: 14px; line-height: 20px; font-weight: 500; color: var(--color-text-secondary)">{{it.loc}} · {{it.short}}</div>
+                <div class="mrow" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 20px; font-size: 15px; line-height: 22px"><span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Package" class="size-5" aria-hidden="true"></x-import></span><span><b style="font-weight: 600; color: var(--color-text-primary)">{{it.loc}}</b><br><span style="font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)">{{it.short}}</span></span></div>
               </sc-for>
             </div>
             <x-import component-from-global-scope="UntitledUI.Checkbox" size="md" label="These packages are back on their shelves" is-selected="{{rel.ok}}" on-change="{{rel.toggle}}"></x-import>
@@ -899,12 +902,13 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
       <x-import component-from-global-scope="UntitledMobile.BottomSheet" title="Move {{mv.ticket}} to a window" on-close="{{mv.close}}">
         <div style="display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; font-family: Inter, sans-serif">
           <div style="font-size: 14px; line-height: 20px; color: var(--color-text-tertiary)">{{mv.name}} will be called to the window you pick. The lobby TV updates right away.</div>
-          <div role="radiogroup" aria-label="Window" style="display: flex; flex-direction: column; gap: 8px">
+          <div role="radiogroup" aria-label="Window" style="display: flex; flex-direction: column; margin: 0 -20px; border-top: 1px solid var(--color-border-secondary); border-bottom: 1px solid var(--color-border-secondary)">
             <sc-for list="{{mv.wins}}" as="w" hint-placeholder-count="3">
-              <button type="button" role="radio" aria-checked="{{w.on}}" disabled="{{w.mineW}}" onClick="{{w.pick}}" style="opacity: {{w.op}}; cursor: {{w.cursor}}; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; border-radius: 10px; border: 0; background: {{w.bg}}; box-shadow: {{w.ring}}; font: inherit; text-align: left; cursor: pointer">
+              <button type="button" role="radio" aria-checked="{{w.on}}" disabled="{{w.mineW}}" onClick="{{w.pick}}" style="opacity: {{w.op}}; cursor: {{w.cursor}}; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 20px; border-radius: 0; border: 0; background: {{w.bg}}; box-shadow: none; font: inherit; text-align: left; cursor: pointer">
                 <span style="display: flex; color: var(--color-fg-quaternary)"><x-import component-from-global-scope="UntitledUI.Icons.Monitor01" class="size-5" aria-hidden="true"></x-import></span>
                 <span style="flex: 1 1 auto; font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-text-primary)">{{w.name}}</span>
                 <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 20px; color: var(--color-text-tertiary)"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: {{w.dot}}"></span>{{w.status}}</span>
+                <span style="width: 20px; flex: 0 0 20px; display: flex; color: var(--color-fg-brand-primary)"><sc-if value="{{w.on}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="UntitledUI.Icons.Check" class="size-5" aria-hidden="true"></x-import></sc-if></span>
               </button>
             </sc-for>
           </div>
@@ -1039,7 +1043,7 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
       <button type="button" class="proto-trigger" onMouseDown="{{kb.hold}}" onClick="{{guest.tryNic}}" style="padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer">Nic several</button>
     </div>
   </sc-if>
-  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 24px; bottom: 12px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
+  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 163px; bottom: 9px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
   <sc-if value="{{proto.open}}" hint-placeholder-val="{{false}}">
     <aside class="proto" aria-label="Prototype controls" style="position: absolute; left: 24px; bottom: 40px; z-index: 82; width: 250px; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
       <div style="font-weight: 600">Prototype only</div>
@@ -1612,14 +1616,14 @@ class Component extends DCLogic {
           fg: got ? 'var(--color-fg-success-primary)' : 'var(--color-fg-quaternary)', state: got ? 'Scanned' : 'To pull'
         });
       });
-      // Package list as rounded containers: one per owner group (proxy or guest), else one for the whole list.
+      // Package list as open rows (mobile rule: lists are never boxed): a line between rows; owner groups get a full-width gray band.
       items.forEach((it, i) => {
         const own = (x) => sortedPk[x] && (sortedPk[x].owner || m.s.name);
         const first = i === 0 || own(i - 1) !== own(i), last = i === items.length - 1 || own(i + 1) !== own(i);
         const hdr = !!it.grpOn;
         it.mt = i === 0 ? '4px' : '12px';
         it.rmt = first && !hdr ? it.mt : '0';
-        it.rTop = first && !hdr ? '1px solid var(--color-border-secondary)' : '0';
+        it.rTop = (i === 0 || hdr) ? '0' : '1px solid var(--color-border-secondary)';
         it.rRad = (first && !hdr ? '12px 12px ' : '0 0 ') + (last ? '12px 12px' : '0 0');
       });
       const signed = !!(m.sig && !m.sig.skipped);

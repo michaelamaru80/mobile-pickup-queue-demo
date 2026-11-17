@@ -58,9 +58,13 @@
   }
 
   /* BottomSheet — a half sheet anchored to the bottom of its positioned container (the phone frame).
-     Opens with the iOS motion: the sheet slides up over 280ms, the overlay fades in over 200ms (none with reduced motion). Closing is instant for now. */
+     Opens with the iOS motion: the sheet slides up over 280ms, the overlay fades in over 200ms (none with reduced motion). Closing is instant for now.
+     Two sizes only: size="half" (422pt, half an iPhone 13 screen) and size="full" (top at 56pt). Both keep their height whatever the content;
+     the body scrolls. Buttons go in the footer: either the `footer` prop or, from markup, a child element with class "um-sheet-footer",
+     which pins to the bottom of the sheet (stacked, full width, clear of the home indicator). No size = legacy content height. */
   function BottomSheet(p) {
     if (p.open === false) return null;
+    var size = p.size || (p.full ? 'full' : null);
     var I = icons();
     var head = p.title ? h('div', { style: { display: 'grid', gridTemplateColumns: '44px minmax(0,1fr) 44px', alignItems: 'center', padding: '8px 12px 12px', borderBottom: p.divider === false ? 0 : '1px solid ' + T.border2 } },
       h('div'),
@@ -69,11 +73,11 @@
     ) : null;
     return h('div', { style: { position: 'absolute', inset: 0, fontFamily: T.font, zIndex: p.zIndex || 40 } },
       h('button', { type: 'button', 'aria-label': 'Close', onClick: p.onClose, tabIndex: -1, className: 'um-sheet-scrim', style: { position: 'absolute', inset: 0, border: 0, padding: 0, background: T.overlay, cursor: 'default' } }),
-      h('div', { role: 'dialog', 'aria-modal': true, 'aria-label': p.title || p.ariaLabel, className: 'um-sheet', style: { position: 'absolute', left: 0, right: 0, bottom: 0, top: p.full ? (p.top || 60) : 'auto', maxHeight: '92%', background: T.bg, borderRadius: '16px 16px 0 0', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 24px rgba(10,13,18,.18)' } },
+      h('div', { role: 'dialog', 'aria-modal': true, 'aria-label': p.title || p.ariaLabel, className: 'um-sheet', style: { position: 'absolute', left: 0, right: 0, bottom: 0, top: size === 'full' ? (p.top != null ? p.top : 56) : 'auto', height: size === 'half' ? 422 : undefined, maxHeight: size === 'full' ? undefined : '92%', background: T.bg, borderRadius: '16px 16px 0 0', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 24px rgba(10,13,18,.18)' } },
         p.showHandle === false ? null : h('div', { style: { display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: p.title ? 0 : 8 } }, h('div', { style: { width: 36, height: 4, borderRadius: 9999, background: T.border1 } })),
         head,
-        h('div', { style: { flex: 1, minHeight: 0, overflowY: 'auto', padding: p.padding != null ? p.padding : '16px 20px 20px' } }, p.children),
-        p.footer ? h('div', { style: { padding: '16px 20px 28px', borderTop: '1px solid ' + T.border2 } }, p.footer) : h('div', { style: { height: 12 } })
+        h('div', { className: 'um-sheet-body', style: { flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: p.padding != null ? p.padding : '16px 20px 0' } }, p.children),
+        p.footer ? h('div', { style: { padding: '12px 20px 34px', borderTop: '1px solid ' + T.border2, display: 'flex', flexDirection: 'column', gap: 12 } }, p.footer) : null
       )
     );
   }
@@ -256,7 +260,7 @@
     // Done-pulse keyframes for ScanSheet (injected once).
   if (typeof document !== 'undefined' && !document.getElementById('um-mobile-css')) {
     var st = document.createElement('style'); st.id = 'um-mobile-css';
-    st.textContent = '@keyframes um-done-breathe{from{box-shadow:0 0 0 0 rgba(23,178,106,.45)}to{box-shadow:0 0 0 7px rgba(23,178,106,.18)}}.um-done-pulse{animation:um-done-breathe 650ms ease-in-out infinite alternate}.um-fullw button{width:100% !important}@keyframes um-sheet-up{from{transform:translateY(100%)}to{transform:none}}@keyframes um-fade-in{from{opacity:0}to{opacity:1}}.um-sheet{animation:um-sheet-up 280ms cubic-bezier(.32,.72,0,1) both}.um-sheet-scrim{animation:um-fade-in 200ms ease-out both}@media (prefers-reduced-motion: reduce){.um-done-pulse,.um-sheet,.um-sheet-scrim{animation:none}}';
+    st.textContent = '@keyframes um-done-breathe{from{box-shadow:0 0 0 0 rgba(23,178,106,.45)}to{box-shadow:0 0 0 7px rgba(23,178,106,.18)}}.um-done-pulse{animation:um-done-breathe 650ms ease-in-out infinite alternate}.um-fullw button{width:100% !important}@keyframes um-sheet-up{from{transform:translateY(100%)}to{transform:none}}@keyframes um-fade-in{from{opacity:0}to{opacity:1}}.um-sheet{animation:um-sheet-up 280ms cubic-bezier(.32,.72,0,1) both}.um-sheet-body>*{flex:1 0 auto;display:flex;flex-direction:column}.um-sheet-body>*:not(:has(.um-sheet-footer)){padding-bottom:34px}.um-sheet-footer{margin:auto -20px 0;position:sticky;bottom:0;z-index:1;display:flex;flex-direction:column;gap:12px;padding:12px 20px 34px;background:var(--color-bg-primary,#fff);border-top:1px solid var(--color-border-secondary,#e9eaeb)}.um-sheet-footer>*{width:100%}.um-sheet-footer button{width:100%}.um-sheet-scrim{animation:um-fade-in 200ms ease-out both}@media (prefers-reduced-motion: reduce){.um-done-pulse,.um-sheet,.um-sheet-scrim{animation:none}}';
     document.head.appendChild(st);
   }
 

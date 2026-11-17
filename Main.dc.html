@@ -1674,11 +1674,11 @@ class Component extends DCLogic {
     const mins = (m) => Math.max(0, m) + ' min';
     // Prototype sample photos (same images as the web Pickup Queue canvas). Students not listed have no photo on file.
     const PH = {
-      'Emily Chen': '/_blob/1500fd05e884843bd0102de99436dea8', 'Marcus Lee': '/_blob/4e0c63dbd4ded1921bd0a2640ee2060a',
-      'Priya Raman': '/_blob/12148bfe55506efdace5130fb59e9eb0', 'Alex Park': '/_blob/82836b39ef93d2414123087ea62892c9',
-      'Sofia Alvarez': '/_blob/2d62996dc578b051327aa5a833841e62', 'Leah Gomez': '/_blob/96cd786436278548a16820b1ec5dc1bd',
-      'Hannah Liu': '/_blob/a83ce914e7c0d5c3435b9f38441e44c9', 'Zoe Carter': '/_blob/f3f3ce3b87098fd95d5ef5a1509a6be7',
-      'Fatima Noor': '/_blob/4736aa13b38580795cff9fab86b66b4f'
+      'Emily Chen': 'assets/1500fd05e884843bd0102de99436dea8.jpg', 'Marcus Lee': 'assets/4e0c63dbd4ded1921bd0a2640ee2060a.jpg',
+      'Priya Raman': 'assets/12148bfe55506efdace5130fb59e9eb0.jpg', 'Alex Park': 'assets/82836b39ef93d2414123087ea62892c9.jpg',
+      'Sofia Alvarez': 'assets/2d62996dc578b051327aa5a833841e62.jpg', 'Leah Gomez': 'assets/96cd786436278548a16820b1ec5dc1bd.jpg',
+      'Hannah Liu': 'assets/a83ce914e7c0d5c3435b9f38441e44c9.jpg', 'Zoe Carter': 'assets/f3f3ce3b87098fd95d5ef5a1509a6be7.jpg',
+      'Fatima Noor': 'assets/4736aa13b38580795cff9fab86b66b4f.jpg', 'Grace Kim': 'assets/dfdf9958872d3ac993b5a3a0a53045a1.jpg'
     };
     const photo = (n) => PH[n] || undefined;
     const zoomOf = (n, sid) => () => { if (PH[n]) this.setState({ zoom: { src: PH[n], name: n, sid } }); };

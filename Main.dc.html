@@ -93,6 +93,8 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
 .proto-trigger{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;font-size:11px !important;letter-spacing:0 !important}
 .proto .proto-tab{color:#8A8A8A !important;border-bottom:2px solid transparent !important;border-radius:0 !important}
 .proto .proto-tab.on{color:#FFFFFF !important;border-bottom-color:#FFFFFF !important}
+.proto-trigger[aria-expanded]{display:inline-flex !important;align-items:center !important;gap:6px !important;height:24px !important;min-height:0 !important;padding:0 10px !important;border:0 !important;border-radius:6px !important;background:#1E1E1E !important;color:#4AF626 !important;opacity:1 !important;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;font-size:11px !important;line-height:16px !important;font-weight:500 !important;letter-spacing:0 !important;white-space:nowrap !important;box-shadow:0 0 0 1px rgba(255,255,255,.22),0 2px 6px rgba(0,0,0,.3) !important;cursor:pointer}
+.proto-trigger[aria-expanded] *{color:inherit !important}
 </style>
 </helmet>
 
@@ -1250,7 +1252,7 @@ a{color:var(--color-text-brand-secondary)}a:hover{color:var(--color-text-brand-s
       <button type="button" class="proto-trigger" onMouseDown="{{kb.hold}}" onClick="{{guest.tryNic}}" style="padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer">Nic several</button>
     </div>
   </sc-if>
-  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 163px; bottom: 9px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
+  <button type="button" class="proto-trigger" aria-expanded="{{proto.open}}" onClick="{{proto.toggle}}" style="position: absolute; left: 16px; bottom: 6px; z-index: 81; padding: 2px 6px; border: 0; background: none; color: {{proto.trigColor}}; opacity: 0.55; cursor: pointer">Simulate</button>
   <sc-if value="{{proto.open}}" hint-placeholder-val="{{false}}">
     <aside class="proto" aria-label="Prototype controls" style="position: absolute; left: 24px; bottom: 40px; z-index: 82; width: 250px; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
       <div style="font-weight: 600">Prototype only</div>
